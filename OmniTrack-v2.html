@@ -1,0 +1,1829 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniTrack: Product, Discount & Price Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 h-full flex flex-col overflow-hidden">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Wrapper -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shrink-0">
+            <div class="p-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-500/20">
+                        <i data-lucide="layers" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-tight">OmniTrack</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Price & Discount Hub</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button onclick="switchTab('products')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="products">
+                    <i data-lucide="package" class="w-5 h-5"></i> Products & Wishlist
+                </button>
+                <button onclick="switchTab('deals')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="deals">
+                    <i data-lucide="scale" class="w-5 h-5"></i> Deals & 購物助手
+                </button>
+                <button onclick="switchTab('vouchers')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="vouchers">
+                    <i data-lucide="ticket" class="w-5 h-5"></i> Vouchers & Codes
+                </button>
+                <button onclick="switchTab('purchased')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="purchased">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i> Purchase History
+                </button>
+                <button onclick="switchTab('exchange')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="exchange">
+                    <i data-lucide="repeat" class="w-5 h-5"></i> Exchange Rates
+                </button>
+                <button onclick="switchTab('backup')" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-target="backup">
+                    <i data-lucide="database" class="w-5 h-5"></i> JSON Backup & Restore
+                </button>
+            </nav>
+
+            <!-- Theme Toggle -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span class="text-xs text-slate-500 font-medium">Dark Mode</span>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Mobile Header -->
+            <header class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="p-1.5 bg-emerald-500 text-white rounded-lg">
+                        <i data-lucide="layers" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-base">OmniTrack</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+                    <button onclick="toggleMobileMenu()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Mobile Menu Drawer -->
+            <div id="mobile-menu" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden md:hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-3/4 max-w-xs bg-white dark:bg-slate-900 p-5 flex flex-col shadow-2xl">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                        <span class="font-bold text-lg">Menu</span>
+                        <button onclick="toggleMobileMenu()" class="p-1 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <nav class="flex-1 space-y-2 overflow-y-auto">
+                        <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                        </button>
+                        <button onclick="switchTab('products'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="package" class="w-5 h-5"></i> Products & Wishlist
+                        </button>
+                        <button onclick="switchTab('deals'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="scale" class="w-5 h-5"></i> Deals & 購物助手
+                        </button>
+                        <button onclick="switchTab('vouchers'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="ticket" class="w-5 h-5"></i> Vouchers & Codes
+                        </button>
+                        <button onclick="switchTab('purchased'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i> Purchase History
+                        </button>
+                        <button onclick="switchTab('exchange'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="repeat" class="w-5 h-5"></i> Exchange Rates
+                        </button>
+                        <button onclick="switchTab('backup'); toggleMobileMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            <i data-lucide="database" class="w-5 h-5"></i> JSON Backup & Restore
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Tab Views Content Container -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+
+                <!-- 1. DASHBOARD TAB -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Dashboard Overview</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Track your wishlist status, active discount vouchers, and total spending.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openProductModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add Product
+                            </button>
+                            <button onclick="openVoucherModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-xl transition-all">
+                                <i data-lucide="ticket-plus" class="w-4 h-4"></i> Add Voucher
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Products</p>
+                                <h3 id="stat-total-products" class="text-2xl font-bold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl">
+                                <i data-lucide="package" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Wishlist & Watching</p>
+                                <h3 id="stat-wishlist-count" class="text-2xl font-bold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
+                                <i data-lucide="eye" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Vouchers</p>
+                                <h3 id="stat-active-vouchers" class="text-2xl font-bold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                                <i data-lucide="ticket" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Spent (HKD)</p>
+                                <h3 id="stat-total-spent" class="text-2xl font-bold mt-1">$0.00</h3>
+                            </div>
+                            <div class="p-3 bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 rounded-xl">
+                                <i data-lucide="wallet" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Price Alerts -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg flex items-center gap-2">
+                                <i data-lucide="bell-ring" class="w-5 h-5 text-emerald-500"></i> Target Price Alerts
+                            </h3>
+                            <span class="text-xs text-slate-500">Current price ≤ Target price</span>
+                        </div>
+                        <div id="target-alerts-list" class="divide-y divide-slate-100 dark:divide-slate-800"></div>
+                    </div>
+
+                    <!-- Quick Previews -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="star" class="w-5 h-5 text-amber-500"></i> Recent Wishlist Items
+                            </h3>
+                            <div id="dashboard-recent-products" class="space-y-3"></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <i data-lucide="ticket" class="w-5 h-5 text-emerald-500"></i> Active Discount Codes
+                            </h3>
+                            <div id="dashboard-recent-vouchers" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PRODUCTS & WISHLIST TAB -->
+                <div id="tab-products" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Products & Wishlist</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Manage item prices, links, target budgets, and price histories with HKD conversions.</p>
+                        </div>
+                        <button onclick="openProductModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add New Product
+                        </button>
+                    </div>
+
+                    <!-- Search and Filters -->
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
+                        <div class="relative w-full sm:w-80">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                            <input type="text" id="product-search" oninput="renderProducts()" placeholder="Search name, brand, store, notes..." class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+                            <select id="product-filter-status" onchange="renderProducts()" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="all">All Status</option>
+                                <option value="Wishlist">Wishlist</option>
+                                <option value="Watching">Watching</option>
+                                <option value="Purchased">Purchased</option>
+                                <option value="Archived">Archived</option>
+                            </select>
+                            <select id="product-filter-category" onchange="renderProducts()" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="all">All Categories</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </div>
+
+                <!-- 3. DEALS & 購物助手 TAB -->
+                <div id="tab-deals" class="tab-content hidden space-y-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Deals & 購物助手</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">紀錄網頁吸睛優惠、跨平台比價，及計算夾單/併單分攤淨成本。</p>
+                        </div>
+                        <button onclick="openDealModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i> 新增吸睛優惠
+                        </button>
+                    </div>
+
+                    <!-- Promo Highlights Grid -->
+                    <div>
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i data-lucide="flame" class="w-5 h-5 text-rose-500"></i> 吸睛優惠選 (Promo Highlights)
+                        </h3>
+                        <div id="deals-highlights-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                    </div>
+
+                    <!-- Multi-Store Price Comparison Matrix -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <div>
+                                <h3 class="font-bold text-lg flex items-center gap-2">
+                                    <i data-lucide="scale" class="w-5 h-5 text-blue-500"></i> 多平台/賣家格價助手 (Price Comparison)
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">比較同一產品喺不同網店/賣家（如 Mercari, HKTVmall, Yahoo!拍賣）嘅底價及折合港幣。</p>
+                            </div>
+                            <button onclick="addComparisonGroup()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 開新格價項目
+                            </button>
+                        </div>
+
+                        <div id="comparison-groups-container" class="space-y-6"></div>
+                    </div>
+
+                    <!-- Group-Buy Cost Splitter -->
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <div>
+                                <h3 class="font-bold text-lg flex items-center gap-2">
+                                    <i data-lucide="calculator" class="w-5 h-5 text-purple-500"></i> 夾單 / 併單分攤計算機 (Cost Splitter)
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">輸入各件物品原價、總運費及優惠券減扣，即時算出每個人/每件貨品實質淨成本 (Net Cost Share)。</p>
+                            </div>
+                            <button onclick="addGroupSplitItem()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5">
+                                <i data-lucide="plus" class="w-4 h-4"></i> 增加夾單項目
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">訂單結算幣值</label>
+                                <select id="splitter-currency" onchange="calculateCostSplit()" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="HKD">HKD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="JPY">JPY (¥)</option>
+                                    <option value="USD">USD ($)</option>
+                                    <option value="TWD">TWD (NT$)</option>
+                                    <option value="RMB">RMB (¥)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">整單總運費 / 集運費</label>
+                                <input type="number" step="0.01" id="splitter-shipping" value="0" oninput="calculateCostSplit()" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">整單總折扣 (Voucher Discount)</label>
+                                <input type="number" step="0.01" id="splitter-discount" value="0" oninput="calculateCostSplit()" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                                        <th class="p-2">項目 / 朋友名稱</th>
+                                        <th class="p-2">貨品原價</th>
+                                        <th class="p-2">分攤運費</th>
+                                        <th class="p-2">分攤折扣</th>
+                                        <th class="p-2">淨付金額 (Net Cost)</th>
+                                        <th class="p-2">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="splitter-items-body" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. VOUCHERS & DISCOUNT HUB -->
+                <div id="tab-vouchers" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Voucher & Discount Hub</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Keep track of promo codes, discount percentages, min spends, currencies, and expiry dates.</p>
+                        </div>
+                        <button onclick="openVoucherModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Voucher Code
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
+                        <div class="relative w-full sm:w-72">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                            <input type="text" id="voucher-search" oninput="renderVouchers()" placeholder="Search store, code..." class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <select id="voucher-filter-status" onchange="renderVouchers()" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="all">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Used">Used</option>
+                            <option value="Expired">Expired</option>
+                        </select>
+                    </div>
+
+                    <!-- Vouchers Grid -->
+                    <div id="vouchers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </div>
+
+                <!-- 5. PURCHASE HISTORY -->
+                <div id="tab-purchased" class="tab-content hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">Purchase History</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Review past acquisitions, shipping fees, total actual spend, and dates.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th class="p-4">Product Name</th>
+                                        <th class="p-4">Platform / Store</th>
+                                        <th class="p-4">Item Price</th>
+                                        <th class="p-4">Shipping / Extra</th>
+                                        <th class="p-4">Total Cost (HKD)</th>
+                                        <th class="p-4">Purchase Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="purchased-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. EXCHANGE RATES -->
+                <div id="tab-exchange" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Exchange Rate Settings</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Customize currency conversion rates against HKD (Base Currency).</p>
+                        </div>
+                        <button onclick="saveExchangeRates()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">
+                            <i data-lucide="save" class="w-4 h-4"></i> Save Rates
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm max-w-2xl">
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">
+                            Enter how much <strong>1 Unit</strong> of foreign currency equals in <strong>HKD ($)</strong>.
+                        </p>
+                        <div id="exchange-rates-form" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- 7. JSON BACKUP & RESTORE -->
+                <div id="tab-backup" class="tab-content hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">JSON Backup & Restore</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Export all data into JSON file with smart sequential suffix (`_a`, `_b`...), or restore from a file.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Export -->
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl w-fit mb-4">
+                                    <i data-lucide="download" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="font-bold text-lg mb-2">Export Data (JSON)</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                    Downloads filename like <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-emerald-600">omnitrack_backup_2026-11-06_a.json</code>. Multiple downloads in a day automatically increment suffix (<code class="text-emerald-600">_b</code>, <code class="text-emerald-600">_c</code>...).
+                                </p>
+                            </div>
+                            <button onclick="exportJSON()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="download" class="w-4 h-4"></i> Download JSON Backup
+                            </button>
+                        </div>
+
+                        <!-- Import -->
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="p-3 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl w-fit mb-4">
+                                    <i data-lucide="upload" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="font-bold text-lg mb-2">Restore Data (JSON)</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                    Upload a previously exported JSON backup file to overwrite and restore products, vouchers, and comparison items.
+                                </p>
+                            </div>
+                            <div>
+                                <input type="file" id="import-file-input" accept=".json" onchange="importJSON(event)" class="hidden">
+                                <button onclick="document.getElementById('import-file-input').click()" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium rounded-xl transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Upload & Restore JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: ADD / EDIT PRODUCT -->
+    <div id="product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 id="product-modal-title" class="font-bold text-lg">Add New Product</h3>
+                <button onclick="closeProductModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="product-form" onsubmit="handleProductSubmit(event)" class="p-6 overflow-y-auto space-y-4 flex-1">
+                <input type="hidden" id="product-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Product Name *</label>
+                        <input type="text" id="product-name" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Brand / Platform</label>
+                        <input type="text" id="product-brand" placeholder="e.g. Mercari, HKTVmall" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+                        <input type="text" id="product-category" placeholder="e.g. Music, Anime, Electronics" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+                        <select id="product-status" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Wishlist">Wishlist</option>
+                            <option value="Watching">Watching</option>
+                            <option value="Purchased">Purchased</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Currency</label>
+                        <select id="product-currency" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="HKD">HKD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="JPY">JPY (¥)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="TWD">TWD (NT$)</option>
+                            <option value="RMB">RMB (¥)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Original Price (原價)</label>
+                        <input type="number" step="0.01" id="product-original" placeholder="Optional" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Current Price *</label>
+                        <input type="number" step="0.01" id="product-price" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Price (Alert)</label>
+                        <input type="number" step="0.01" id="product-target" placeholder="Optional" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Shipping / Extra Cost</label>
+                        <input type="number" step="0.01" id="product-shipping" value="0" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Product Link (URL)</label>
+                        <input type="url" id="product-link" placeholder="https://..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Notes / Reminders</label>
+                    <textarea id="product-notes" rows="2" placeholder="e.g. Check item quality, vintage mold code..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-xl transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT DEAL -->
+    <div id="deal-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 id="deal-modal-title" class="font-bold text-lg">新增吸睛優惠</h3>
+                <button onclick="closeDealModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="deal-form" onsubmit="handleDealSubmit(event)" class="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+                <input type="hidden" id="deal-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">優惠標題 *</label>
+                    <input type="text" id="deal-title" placeholder="例如：日本 Amazon 限時減價 30%" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">平台 / 商店 *</label>
+                        <input type="text" id="deal-store" placeholder="e.g. HKTVmall, Mercari" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">標籤 Highlight</label>
+                        <select id="deal-tag" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="🔥 限時搶購">🔥 限時搶購</option>
+                            <option value="📉 歷史新低">📉 歷史新低</option>
+                            <option value="🎁 獨家優惠">🎁 獨家優惠</option>
+                            <option value="🚚 免運費併單">🚚 免運費併單</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">幣值</label>
+                        <select id="deal-currency" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="HKD">HKD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="JPY">JPY (¥)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="TWD">TWD (NT$)</option>
+                            <option value="RMB">RMB (¥)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">原價</label>
+                        <input type="number" step="0.01" id="deal-original" placeholder="Optional" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">特價 *</label>
+                        <input type="number" step="0.01" id="deal-price" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">截止日期</label>
+                        <input type="date" id="deal-expiry" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">優惠連結</label>
+                        <input type="url" id="deal-link" placeholder="https://..." class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closeDealModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-xl transition-all">取消</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">儲存優惠</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT VOUCHER -->
+    <div id="voucher-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 id="voucher-modal-title" class="font-bold text-lg">Add Discount Voucher</h3>
+                <button onclick="closeVoucherModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="voucher-form" onsubmit="handleVoucherSubmit(event)" class="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+                <input type="hidden" id="voucher-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Store / Platform *</label>
+                        <input type="text" id="voucher-store" placeholder="e.g. Amazon, HKTVmall" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Voucher Code *</label>
+                        <input type="text" id="voucher-code" placeholder="e.g. SUMMER2026" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Currency</label>
+                        <select id="voucher-currency" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="HKD">HKD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="JPY">JPY (¥)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="TWD">TWD (NT$)</option>
+                            <option value="RMB">RMB (¥)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Discount Type</label>
+                        <select id="voucher-type" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Percentage">Percentage (%)</option>
+                            <option value="Fixed">Fixed Amount ($)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Discount Value *</label>
+                        <input type="number" step="0.01" id="voucher-value" placeholder="e.g. 10 or 50" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Min. Spend</label>
+                        <input type="number" step="0.01" id="voucher-minspend" value="0" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Expiry Date</label>
+                        <input type="date" id="voucher-expiry" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+                    <select id="voucher-status" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="Active">Active</option>
+                        <option value="Used">Used</option>
+                        <option value="Expired">Expired</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Description / Notes</label>
+                    <input type="text" id="voucher-desc" placeholder="e.g. Free shipping included over $500" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closeVoucherModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-xl transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">Save Voucher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PRICE LOG -->
+    <div id="pricelog-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-lg">Log New Price Point</h3>
+                <button onclick="closePriceLogModal()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="pricelog-form" onsubmit="handlePriceLogSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="pricelog-product-id">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">New Price (*)</label>
+                    <input type="number" step="0.01" id="pricelog-amount" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Date</label>
+                    <input type="date" id="pricelog-date" required class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closePriceLogModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-xl transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-emerald-600/20 transition-all">Add Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC SCRIPT -->
+    <script>
+        const DEFAULT_EXCHANGE_RATES = {
+            HKD: 1.0,
+            EUR: 8.45,
+            JPY: 0.052,
+            USD: 7.82,
+            TWD: 0.25,
+            RMB: 1.08
+        };
+
+        let appData = {
+            products: [],
+            vouchers: [],
+            deals: [],
+            comparisons: [],
+            splitterItems: [],
+            exchangeRates: { ...DEFAULT_EXCHANGE_RATES },
+            downloadLogs: {}
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('omnitrack_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appData.products = parsed.products || [];
+                    appData.vouchers = parsed.vouchers || [];
+                    appData.deals = parsed.deals || [];
+                    appData.comparisons = parsed.comparisons || [];
+                    appData.splitterItems = parsed.splitterItems || [];
+                    appData.exchangeRates = { ...DEFAULT_EXCHANGE_RATES, ...(parsed.exchangeRates || {}) };
+                    appData.downloadLogs = parsed.downloadLogs || {};
+                } catch (e) {
+                    console.error("Failed to parse saved data", e);
+                }
+            } else {
+                seedSampleData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('omnitrack_data', JSON.stringify(appData));
+        }
+
+        function seedSampleData() {
+            appData.products = [
+                {
+                    id: 'p1',
+                    name: 'Roland Aerophone AE-20',
+                    brand: 'Amazon JP',
+                    category: 'Music Gear',
+                    currency: 'JPY',
+                    originalPrice: 110000,
+                    price: 98000,
+                    targetPrice: 90000,
+                    shipping: 2500,
+                    status: 'Watching',
+                    link: 'https://amazon.co.jp',
+                    notes: 'Custom ZEN-Core patch support',
+                    history: [{ date: '2026-11-01', price: 98000 }],
+                    createdAt: '2026-11-01'
+                },
+                {
+                    id: 'p2',
+                    name: 'Beyblade Metal Fusion - Sol Blaze',
+                    brand: 'Mercari',
+                    category: 'Collectibles',
+                    currency: 'JPY',
+                    originalPrice: 6000,
+                    price: 4500,
+                    targetPrice: 4000,
+                    shipping: 500,
+                    status: 'Wishlist',
+                    link: 'https://mercari.com/jp',
+                    notes: 'Check part codes for authentic vintage vs midfake',
+                    history: [{ date: '2026-11-02', price: 4500 }],
+                    createdAt: '2026-11-02'
+                }
+            ];
+
+            appData.vouchers = [
+                {
+                    id: 'v1',
+                    store: 'Mercari JP',
+                    code: 'WINTER1000',
+                    currency: 'JPY',
+                    type: 'Fixed',
+                    value: 1000,
+                    minSpend: 5000,
+                    expiry: '2026-11-30',
+                    status: 'Active',
+                    desc: '¥1,000 OFF on orders over ¥5,000'
+                }
+            ];
+
+            appData.deals = [
+                {
+                    id: 'd1',
+                    title: 'Cubase 13 Pro Upgrade Discount',
+                    store: 'Steinberg Official',
+                    tag: '🔥 限時搶購',
+                    currency: 'USD',
+                    original: 199,
+                    price: 139,
+                    expiry: '2026-11-20',
+                    link: 'https://steinberg.net'
+                }
+            ];
+
+            appData.comparisons = [
+                {
+                    id: 'c1',
+                    title: 'J-Pop & Anime Flute Sheet Music Collection',
+                    offers: [
+                        { id: 'o1', store: 'Amazon JP', currency: 'JPY', price: 3200, shipping: 600, notes: 'New, includes accompaniment CD' },
+                        { id: 'o2', store: 'Yahoo! Auctions', currency: 'JPY', price: 2500, shipping: 800, notes: 'Used (A grade)' },
+                        { id: 'o3', store: 'HK Local Music Store', currency: 'HKD', price: 260, shipping: 0, notes: 'In stock at Mong Kok' }
+                    ]
+                }
+            ];
+
+            appData.splitterItems = [
+                { id: 's1', name: 'Flute Sheet Book', price: 2500 },
+                { id: 's2', name: 'Aerophone Accessories', price: 3500 }
+            ];
+
+            saveData();
+        }
+
+        /* Currency Helpers */
+        function convertToHKD(amount, currency) {
+            const rate = appData.exchangeRates[currency] || 1.0;
+            return Number(amount || 0) * rate;
+        }
+
+        function formatHKD(amount) {
+            return 'HK$' + Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatCurrency(amount, currency) {
+            if (currency === 'EUR') return '€' + Number(amount || 0).toFixed(2);
+            if (currency === 'JPY') return '¥' + Number(amount || 0).toLocaleString();
+            if (currency === 'USD') return '$' + Number(amount || 0).toFixed(2);
+            if (currency === 'TWD') return 'NT$' + Number(amount || 0).toLocaleString();
+            if (currency === 'RMB') return '¥' + Number(amount || 0).toFixed(2);
+            return '$' + Number(amount || 0).toFixed(2);
+        }
+
+        /* Tab Switcher */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.target === tabId) {
+                    btn.classList.add('bg-emerald-50', 'dark:bg-emerald-950/50', 'text-emerald-600', 'dark:text-emerald-400');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-400');
+                } else {
+                    btn.classList.remove('bg-emerald-50', 'dark:bg-emerald-950/50', 'text-emerald-600', 'dark:text-emerald-400');
+                    btn.classList.add('text-slate-600', 'dark:text-slate-400');
+                }
+            });
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'products') renderProducts();
+            if (tabId === 'deals') renderDealsView();
+            if (tabId === 'vouchers') renderVouchers();
+            if (tabId === 'purchased') renderPurchased();
+            if (tabId === 'exchange') renderExchangeRatesForm();
+
+            lucide.createIcons();
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('omnitrack_dark', document.documentElement.classList.contains('dark'));
+        }
+
+        function initTheme() {
+            const isDark = localStorage.getItem('omnitrack_dark') === 'true' || 
+                (!localStorage.getItem('omnitrack_dark') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-xl text-white text-sm font-medium flex items-center gap-3 transition-all transform translate-y-2 opacity-0 ${
+                type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+            }`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4"></i> ${message}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* DASHBOARD */
+        function renderDashboard() {
+            document.getElementById('stat-total-products').innerText = appData.products.length;
+            document.getElementById('stat-wishlist-count').innerText = appData.products.filter(p => p.status === 'Wishlist' || p.status === 'Watching').length;
+            document.getElementById('stat-active-vouchers').innerText = appData.vouchers.filter(v => v.status === 'Active').length;
+            
+            const totalSpentHKD = appData.products
+                .filter(p => p.status === 'Purchased')
+                .reduce((sum, p) => sum + convertToHKD(p.price, p.currency) + convertToHKD(p.shipping || 0, p.currency), 0);
+
+            document.getElementById('stat-total-spent').innerText = formatHKD(totalSpentHKD);
+
+            // Target Price Alerts
+            const alertsList = document.getElementById('target-alerts-list');
+            const targetProducts = appData.products.filter(p => p.targetPrice && Number(p.targetPrice) > 0 && Number(p.price) <= Number(p.targetPrice) && p.status !== 'Purchased');
+            
+            if (targetProducts.length === 0) {
+                alertsList.innerHTML = `<p class="py-4 text-sm text-slate-400 text-center">No active target price matches right now.</p>`;
+            } else {
+                alertsList.innerHTML = targetProducts.map(p => `
+                    <div class="py-3 flex items-center justify-between gap-4 text-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 rounded-lg">
+                                <i data-lucide="trending-down" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-slate-800 dark:text-slate-200">${escapeHTML(p.name)}</h4>
+                                <p class="text-xs text-slate-500">
+                                    Target: ${formatCurrency(p.targetPrice, p.currency)} <span class="text-slate-400">(~${formatHKD(convertToHKD(p.targetPrice, p.currency))})</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-right">
+                            <div>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400">${formatCurrency(p.price, p.currency)}</span>
+                                <span class="text-xs text-slate-400 block">Current (~${formatHKD(convertToHKD(p.price, p.currency))})</span>
+                            </div>
+                            ${p.link ? `<a href="${escapeHTML(p.link)}" target="_blank" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Recent Wishlist
+            const recentProdDiv = document.getElementById('dashboard-recent-products');
+            const recentProds = [...appData.products].filter(p => p.status !== 'Purchased').slice(0, 4);
+            recentProdDiv.innerHTML = recentProds.length === 0 ? `<p class="text-sm text-slate-400 text-center py-4">No items in wishlist.</p>` : recentProds.map(p => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                    <div>
+                        <h4 class="font-medium text-sm text-slate-800 dark:text-slate-200">${escapeHTML(p.name)}</h4>
+                        <span class="text-xs text-slate-500">${escapeHTML(p.brand || 'Store')} • ${p.status}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-semibold text-sm">${formatCurrency(p.price, p.currency)}</span>
+                        <span class="text-xs text-slate-400 block">~${formatHKD(convertToHKD(p.price, p.currency))}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Recent Vouchers
+            const recentVoucherDiv = document.getElementById('dashboard-recent-vouchers');
+            const activeVouchersList = appData.vouchers.filter(v => v.status === 'Active').slice(0, 4);
+            recentVoucherDiv.innerHTML = activeVouchersList.length === 0 ? `<p class="text-sm text-slate-400 text-center py-4">No active vouchers.</p>` : activeVouchersList.map(v => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono font-bold text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded">${escapeHTML(v.code)}</span>
+                            <span class="text-xs font-medium text-slate-600 dark:text-slate-400">${escapeHTML(v.store)}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${v.type === 'Percentage' ? v.value + '% OFF' : formatCurrency(v.value, v.currency || 'HKD') + ' OFF'}</p>
+                    </div>
+                    <button onclick="copyVoucherCode('${escapeHTML(v.code)}')" class="p-2 text-slate-500 hover:text-emerald-600 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        /* PRODUCTS & WISHLIST */
+        function renderProducts() {
+            const search = document.getElementById('product-search').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('product-filter-status').value;
+            const categoryFilter = document.getElementById('product-filter-category').value;
+
+            const categories = [...new Set(appData.products.map(p => p.category).filter(Boolean))];
+            const catSelect = document.getElementById('product-filter-category');
+            const currentCatVal = catSelect.value;
+            catSelect.innerHTML = `<option value="all">All Categories</option>` + categories.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+            catSelect.value = categories.includes(currentCatVal) ? currentCatVal : 'all';
+
+            const filtered = appData.products.filter(p => {
+                const haystack = [p.name, p.brand, p.category, p.notes].filter(Boolean).join(' ').toLowerCase();
+                return (!search || haystack.includes(search)) &&
+                       (statusFilter === 'all' || p.status === statusFilter) &&
+                       (categoryFilter === 'all' || p.category === categoryFilter);
+            });
+
+            const grid = document.getElementById('products-grid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-sm">No products match the filter criteria.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const currentHkd = convertToHKD(p.price, p.currency);
+                const originalHkd = p.originalPrice ? convertToHKD(p.originalPrice, p.currency) : null;
+                const targetHkd = p.targetPrice ? convertToHKD(p.targetPrice, p.currency) : null;
+                const isUnderTarget = p.targetPrice && Number(p.targetPrice) > 0 && Number(p.price) <= Number(p.targetPrice);
+                
+                const discountPct = p.originalPrice && Number(p.originalPrice) > Number(p.price) 
+                    ? Math.round(((Number(p.originalPrice) - Number(p.price)) / Number(p.originalPrice)) * 100) 
+                    : null;
+
+                const prices = p.history && p.history.length > 0 ? p.history.map(h => Number(h.price)) : [Number(p.price)];
+                const minPrice = Math.min(...prices);
+                const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+                const statusBadgeColor = 
+                    p.status === 'Wishlist' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' :
+                    p.status === 'Watching' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' :
+                    p.status === 'Purchased' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' :
+                    'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+
+                return `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${statusBadgeColor}">${p.status}</span>
+                                    ${discountPct ? `<span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">-${discountPct}%</span>` : ''}
+                                    <span class="text-xs text-slate-400">${escapeHTML(p.category || 'General')}</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="openPriceLogModal('${p.id}')" title="Log Price Point" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                        <i data-lucide="line-chart" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="editProduct('${p.id}')" title="Edit Card" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="deleteProduct('${p.id}')" title="Delete Card" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-1">${escapeHTML(p.name)}</h3>
+                            <p class="text-xs text-slate-500 mb-4">${escapeHTML(p.brand || 'No Store Specified')}</p>
+
+                            <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl mb-4 space-y-2">
+                                ${p.originalPrice ? `
+                                    <div class="flex items-center justify-between text-xs text-slate-400">
+                                        <span>Original Price:</span>
+                                        <div class="text-right">
+                                            <span class="line-through">${formatCurrency(p.originalPrice, p.currency)}</span>
+                                            <span class="text-xs text-slate-400 block">(~${formatHKD(originalHkd)})</span>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">Current Price:</span>
+                                    <div class="text-right">
+                                        <span class="font-bold text-slate-900 dark:text-white text-sm">${formatCurrency(p.price, p.currency)}</span>
+                                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">(~${formatHKD(currentHkd)})</span>
+                                    </div>
+                                </div>
+                                ${p.targetPrice ? `
+                                    <div class="flex items-center justify-between pt-1.5 border-t border-slate-200 dark:border-slate-700">
+                                        <span class="text-xs text-slate-500">Target Price:</span>
+                                        <div class="text-right">
+                                            <span class="font-semibold text-xs ${isUnderTarget ? 'text-emerald-600 font-bold' : ''}">${formatCurrency(p.targetPrice, p.currency)} ${isUnderTarget ? '🔥' : ''}</span>
+                                            <span class="text-xs text-slate-400 block">(~${formatHKD(targetHkd)})</span>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                <div class="flex items-center justify-between text-xs text-slate-400 pt-1.5 border-t border-slate-200 dark:border-slate-700">
+                                    <span>Min / Avg Price:</span>
+                                    <span class="font-mono text-xs">${formatCurrency(minPrice, p.currency)} / ${formatCurrency(avgPrice, p.currency)}</span>
+                                </div>
+                            </div>
+
+                            ${p.notes ? `<p class="text-xs text-slate-500 italic mb-4 line-clamp-2">"${escapeHTML(p.notes)}"</p>` : ''}
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <button onclick="editProduct('${p.id}')" class="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 font-medium">
+                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> Edit Details
+                            </button>
+                            ${p.link ? `<a href="${escapeHTML(p.link)}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:underline">Visit Store <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : '<span></span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openProductModal(productId = null) {
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('product-modal-title').innerText = 'Add New Product';
+            
+            if (productId) {
+                const p = appData.products.find(item => item.id === productId);
+                if (p) {
+                    document.getElementById('product-id').value = p.id;
+                    document.getElementById('product-name').value = p.name;
+                    document.getElementById('product-brand').value = p.brand || '';
+                    document.getElementById('product-category').value = p.category || '';
+                    document.getElementById('product-status').value = p.status;
+                    document.getElementById('product-currency').value = p.currency;
+                    document.getElementById('product-original').value = p.originalPrice || '';
+                    document.getElementById('product-price').value = p.price;
+                    document.getElementById('product-target').value = p.targetPrice || '';
+                    document.getElementById('product-shipping').value = p.shipping || 0;
+                    document.getElementById('product-link').value = p.link || '';
+                    document.getElementById('product-notes').value = p.notes || '';
+                    document.getElementById('product-modal-title').innerText = 'Edit Product';
+                }
+            }
+            document.getElementById('product-modal').classList.remove('hidden');
+            document.getElementById('product-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+            document.getElementById('product-modal').classList.remove('flex');
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('product-id').value;
+            const name = document.getElementById('product-name').value;
+            const brand = document.getElementById('product-brand').value;
+            const category = document.getElementById('product-category').value;
+            const status = document.getElementById('product-status').value;
+            const currency = document.getElementById('product-currency').value;
+            const originalPrice = document.getElementById('product-original').value ? Number(document.getElementById('product-original').value) : null;
+            const price = Number(document.getElementById('product-price').value);
+            const targetPrice = document.getElementById('product-target').value ? Number(document.getElementById('product-target').value) : null;
+            const shipping = Number(document.getElementById('product-shipping').value) || 0;
+            const link = document.getElementById('product-link').value;
+            const notes = document.getElementById('product-notes').value;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if (id) {
+                const p = appData.products.find(item => item.id === id);
+                if (p) {
+                    p.name = name; p.brand = brand; p.category = category; p.status = status;
+                    p.currency = currency; p.originalPrice = originalPrice;
+                    if (p.price !== price) {
+                        if (!p.history) p.history = [];
+                        p.history.push({ date: todayStr, price });
+                    }
+                    p.price = price; p.targetPrice = targetPrice; p.shipping = shipping; p.link = link; p.notes = notes;
+                    showToast('Product updated successfully!');
+                }
+            } else {
+                appData.products.unshift({
+                    id: 'p_' + Date.now(),
+                    name, brand, category, status, currency, originalPrice, price, targetPrice, shipping, link, notes,
+                    history: [{ date: todayStr, price }],
+                    createdAt: todayStr
+                });
+                showToast('Product added successfully!');
+            }
+
+            saveData();
+            closeProductModal();
+            renderProducts();
+            renderDashboard();
+        }
+
+        function editProduct(id) { openProductModal(id); }
+        function deleteProduct(id) {
+            if (confirm('Delete this product card?')) {
+                appData.products = appData.products.filter(p => p.id !== id);
+                saveData(); renderProducts(); renderDashboard();
+                showToast('Product deleted.', 'error');
+            }
+        }
+
+        /* PRICE LOG MODAL */
+        function openPriceLogModal(productId) {
+            document.getElementById('pricelog-product-id').value = productId;
+            document.getElementById('pricelog-amount').value = '';
+            document.getElementById('pricelog-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pricelog-modal').classList.remove('hidden');
+            document.getElementById('pricelog-modal').classList.add('flex');
+        }
+        function closePriceLogModal() {
+            document.getElementById('pricelog-modal').classList.add('hidden');
+            document.getElementById('pricelog-modal').classList.remove('flex');
+        }
+        function handlePriceLogSubmit(e) {
+            e.preventDefault();
+            const productId = document.getElementById('pricelog-product-id').value;
+            const amount = Number(document.getElementById('pricelog-amount').value);
+            const date = document.getElementById('pricelog-date').value;
+
+            const p = appData.products.find(item => item.id === productId);
+            if (p) {
+                if (!p.history) p.history = [];
+                p.history.push({ date, price: amount });
+                p.price = amount;
+                saveData(); closePriceLogModal(); renderProducts(); renderDashboard();
+                showToast('Price point logged!');
+            }
+        }
+
+        /* 3. DEALS & 購物助手 */
+        function renderDealsView() {
+            renderPromoHighlights();
+            renderComparisonGroups();
+            renderCostSplitter();
+        }
+
+        function renderPromoHighlights() {
+            const grid = document.getElementById('deals-highlights-grid');
+            if (appData.deals.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-sm">尚未有吸睛優惠紀錄，點擊右上角新增！</div>`;
+                return;
+            }
+
+            grid.innerHTML = appData.deals.map(d => {
+                const discountPct = d.original && d.original > d.price ? Math.round(((d.original - d.price) / d.original) * 100) : null;
+                const priceHkd = convertToHKD(d.price, d.currency);
+
+                return `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">${escapeHTML(d.tag)}</span>
+                                <button onclick="deleteDeal('${d.id}')" class="text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                            <h4 class="font-bold text-base text-slate-900 dark:text-slate-100 mb-1">${escapeHTML(d.title)}</h4>
+                            <p class="text-xs text-slate-500 mb-3">${escapeHTML(d.store)}</p>
+
+                            <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl mb-3 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-slate-400 block">特價 (${d.currency})</span>
+                                    <span class="font-bold text-lg text-emerald-600 dark:text-emerald-400">${formatCurrency(d.price, d.currency)}</span>
+                                    <span class="text-xs text-slate-500 block font-medium">~${formatHKD(priceHkd)}</span>
+                                </div>
+                                ${discountPct ? `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-lg text-xs font-bold">省 ${discountPct}%</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                            <span>${d.expiry ? '截止: ' + d.expiry : '長期有效'}</span>
+                            ${d.link ? `<a href="${escapeHTML(d.link)}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 font-medium">直達連結 <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openDealModal() {
+            document.getElementById('deal-form').reset();
+            document.getElementById('deal-id').value = '';
+            document.getElementById('deal-modal').classList.remove('hidden');
+            document.getElementById('deal-modal').classList.add('flex');
+        }
+        function closeDealModal() {
+            document.getElementById('deal-modal').classList.add('hidden');
+            document.getElementById('deal-modal').classList.remove('flex');
+        }
+        function handleDealSubmit(e) {
+            e.preventDefault();
+            const newDeal = {
+                id: 'd_' + Date.now(),
+                title: document.getElementById('deal-title').value,
+                store: document.getElementById('deal-store').value,
+                tag: document.getElementById('deal-tag').value,
+                currency: document.getElementById('deal-currency').value,
+                original: document.getElementById('deal-original').value ? Number(document.getElementById('deal-original').value) : null,
+                price: Number(document.getElementById('deal-price').value),
+                expiry: document.getElementById('deal-expiry').value || null,
+                link: document.getElementById('deal-link').value || null
+            };
+            appData.deals.unshift(newDeal);
+            saveData(); closeDealModal(); renderDealsView();
+            showToast('吸睛優惠已新增！');
+        }
+        function deleteDeal(id) {
+            appData.deals = appData.deals.filter(d => d.id !== id);
+            saveData(); renderDealsView();
+            showToast('優惠已刪除', 'error');
+        }
+
+        /* 格價助手 (Price Comparison Matrix) */
+        function renderComparisonGroups() {
+            const container = document.getElementById('comparison-groups-container');
+            if (appData.comparisons.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-400 text-sm">尚未有跨平台格價項目，點擊上方按鈕建立第一個格價群組！</div>`;
+                return;
+            }
+
+            container.innerHTML = appData.comparisons.map((c, groupIdx) => {
+                let lowestHkd = Infinity;
+                c.offers.forEach(o => {
+                    const totalHkd = convertToHKD(o.price, o.currency) + convertToHKD(o.shipping || 0, o.currency);
+                    if (totalHkd < lowestHkd) lowestHkd = totalHkd;
+                });
+
+                return `
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700/60 p-5 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-700 pb-3">
+                            <input type="text" value="${escapeHTML(c.title)}" onchange="updateComparisonTitle('${c.id}', this.value)" placeholder="輸入格價產品名稱..." class="font-bold text-base bg-transparent border-b border-dashed border-slate-300 dark:border-slate-600 focus:outline-none focus:border-emerald-500 px-1 py-0.5 w-full sm:w-auto">
+                            <div class="flex items-center gap-2">
+                                <button onclick="addOfferToGroup('${c.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> 加入賣家/平台
+                                </button>
+                                <button onclick="deleteComparisonGroup('${c.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                                        <th class="p-2">賣家 / 平台</th>
+                                        <th class="p-2">貨幣</th>
+                                        <th class="p-2">原價/標價</th>
+                                        <th class="p-2">運費</th>
+                                        <th class="p-2">折合港幣總價 (HKD)</th>
+                                        <th class="p-2">備註</th>
+                                        <th class="p-2">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                    ${c.offers.map((o, oIdx) => {
+                                        const itemHkd = convertToHKD(o.price, o.currency);
+                                        const shipHkd = convertToHKD(o.shipping || 0, o.currency);
+                                        const totalHkd = itemHkd + shipHkd;
+                                        const isCheapest = totalHkd === lowestHkd && totalHkd > 0;
+
+                                        return `
+                                            <tr class="${isCheapest ? 'bg-emerald-50/60 dark:bg-emerald-950/30' : ''}">
+                                                <td class="p-2">
+                                                    <input type="text" value="${escapeHTML(o.store)}" onchange="updateOfferField('${c.id}', '${o.id}', 'store', this.value)" class="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                                                </td>
+                                                <td class="p-2">
+                                                    <select onchange="updateOfferField('${c.id}', '${o.id}', 'currency', this.value)" class="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                                                        <option value="HKD" ${o.currency === 'HKD' ? 'selected' : ''}>HKD ($)</option>
+                                                        <option value="EUR" ${o.currency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
+                                                        <option value="JPY" ${o.currency === 'JPY' ? 'selected' : ''}>JPY (¥)</option>
+                                                        <option value="USD" ${o.currency === 'USD' ? 'selected' : ''}>USD ($)</option>
+                                                        <option value="TWD" ${o.currency === 'TWD' ? 'selected' : ''}>TWD (NT$)</option>
+                                                        <option value="RMB" ${o.currency === 'RMB' ? 'selected' : ''}>RMB (¥)</option>
+                                                    </select>
+                                                </td>
+                                                <td class="p-2">
+                                                    <input type="number" step="0.01" value="${o.price}" onchange="updateOfferField('${c.id}', '${o.id}', 'price', Number(this.value))" class="w-20 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                                                </td>
+                                                <td class="p-2">
+                                                    <input type="number" step="0.01" value="${o.shipping || 0}" onchange="updateOfferField('${c.id}', '${o.id}', 'shipping', Number(this.value))" class="w-16 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                                                </td>
+                                                <td class="p-2 font-bold ${isCheapest ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'}">
+                                                    ${formatHKD(totalHkd)} ${isCheapest ? '👑 最平' : ''}
+                                                </td>
+                                                <td class="p-2">
+                                                    <input type="text" value="${escapeHTML(o.notes || '')}" onchange="updateOfferField('${c.id}', '${o.id}', 'notes', this.value)" placeholder="備註..." class="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                                                </td>
+                                                <td class="p-2">
+                                                    <button onclick="deleteOfferFromGroup('${c.id}', '${o.id}')" class="text-slate-400 hover:text-rose-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function addComparisonGroup() {
+            appData.comparisons.unshift({
+                id: 'c_' + Date.now(),
+                title: '新格價項目',
+                offers: [
+                    { id: 'o_' + Date.now() + '_1', store: '平台 A', currency: 'HKD', price: 100, shipping: 0, notes: '' },
+                    { id: 'o_' + Date.now() + '_2', store: '平台 B (日本)', currency: 'JPY', price: 1800, shipping: 300, notes: '' }
+                ]
+            });
+            saveData(); renderComparisonGroups();
+        }
+        function deleteComparisonGroup(id) {
+            appData.comparisons = appData.comparisons.filter(c => c.id !== id);
+            saveData(); renderComparisonGroups();
+        }
+        function updateComparisonTitle(groupId, title) {
+            const c = appData.comparisons.find(item => item.id === groupId);
+            if (c) { c.title = title; saveData(); }
+        }
+        function addOfferToGroup(groupId) {
+            const c = appData.comparisons.find(item => item.id === groupId);
+            if (c) {
+                c.offers.push({ id: 'o_' + Date.now(), store: '新賣家', currency: 'HKD', price: 0, shipping: 0, notes: '' });
+                saveData(); renderComparisonGroups();
+            }
+        }
+        function deleteOfferFromGroup(groupId, offerId) {
+            const c = appData.comparisons.find(item => item.id === groupId);
+            if (c) {
+                c.offers = c.offers.filter(o => o.id !== offerId);
+                saveData(); renderComparisonGroups();
+            }
+        }
+        function updateOfferField(groupId, offerId, field, val) {
+            const c = appData.comparisons.find(item => item.id === groupId);
+            if (c) {
+                const o = c.offers.find(item => item.id === offerId);
+                if (o) {
+                    o[field] = val;
+                    saveData(); renderComparisonGroups();
+                }
+            }
+        }
+
+        /* 夾單 / 併單分攤計算機 (Group-Buy Cost Splitter) */
+        function renderCostSplitter() {
+            calculateCostSplit();
+        }
+        function addGroupSplitItem() {
+            appData.splitterItems.push({ id: 's_' + Date.now(), name: '新貨品 / 朋友', price: 100 });
+            saveData(); calculateCostSplit();
+        }
+        function deleteGroupSplitItem(id) {
+            appData.splitterItems = appData.splitterItems.filter(item => item.id !== id);
+            saveData(); calculateCostSplit();
+        }
+        function updateSplitterItem(id, field, val) {
+            const item = appData.splitterItems.find(i => i.id === id);
+            if (item) {
+                item[field] = val;
+                saveData(); calculateCostSplit();
+            }
+        }
+
+        function calculateCostSplit() {
+            const tbody = document.getElementById('splitter-items-body');
+            const currency = document.getElementById('splitter-currency') ? document.getElementById('splitter-currency').value : 'HKD';
+            const totalShip = Number(document.getElementById('splitter-shipping') ? document.getElementById('splitter-shipping').value : 0);
+            const totalDisc = Number(document.getElementById('splitter-discount') ? document.getElementById('splitter-discount').value : 0);
+
+            const itemsTotal = appData.splitterItems.reduce((sum, item) => sum + Number(item.price || 0), 0);
+
+            if (appData.splitterItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">尚未新增夾單項目。</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = appData.splitterItems.map(item => {
+                const itemPrice = Number(item.price || 0);
+                const shareRatio = itemsTotal > 0 ? itemPrice / itemsTotal : 0;
+                const shipShare = totalShip * shareRatio;
+                const discShare = totalDisc * shareRatio;
+                const netCost = itemPrice + shipShare - discShare;
+                const netCostHkd = convertToHKD(netCost, currency);
+
+                return `
+                    <tr>
+                        <td class="p-2">
+                            <input type="text" value="${escapeHTML(item.name)}" onchange="updateSplitterItem('${item.id}', 'name', this.value)" class="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                        </td>
+                        <td class="p-2">
+                            <input type="number" step="0.01" value="${itemPrice}" onchange="updateSplitterItem('${item.id}', 'price', Number(this.value))" class="w-24 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-xs">
+                        </td>
+                        <td class="p-2 text-slate-500 font-mono">+${formatCurrency(shipShare, currency)}</td>
+                        <td class="p-2 text-emerald-600 font-mono">-${formatCurrency(discShare, currency)}</td>
+                        <td class="p-2 font-bold text-slate-900 dark:text-white">
+                            ${formatCurrency(netCost, currency)}
+                            <span class="text-xs text-slate-400 block font-normal">(~${formatHKD(netCostHkd)})</span>
+                        </td>
+                        <td class="p-2">
+                            <button onclick="deleteGroupSplitItem('${item.id}')" class="text-slate-400 hover:text-rose-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') + `
+                <tr class="font-bold bg-slate-100 dark:bg-slate-800/80">
+                    <td class="p-2">貨品小計 (Items Total)</td>
+                    <td class="p-2">${formatCurrency(itemsTotal, currency)}</td>
+                    <td class="p-2 font-mono text-slate-500">+${formatCurrency(totalShip, currency)}</td>
+                    <td class="p-2 font-mono text-emerald-600">-${formatCurrency(totalDisc, currency)}</td>
+                    <td class="p-2 text-emerald-600 dark:text-emerald-400">${formatCurrency(itemsTotal + totalShip - totalDisc, currency)}</td>
+                    <td class="p-2"></td>
+                </tr>
+            `;
+            lucide.createIcons();
+        }
+
+        /* VOUCHERS */
+        function renderVouchers() {
+            const search = document.getElementById('voucher-search').value.toLowerCase();
+            const statusFilter = document.getElementById('voucher-filter-status').value;
+
+            const filtered = appData.vouchers.filter(v => {
+                const matchesSearch = v.store.toLowerCase().includes(search) || v.code.toLowerCase().includes(search);
+                const matchesStatus = statusFilter === 'all' || v.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            const grid = document.getElementById('vouchers-grid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-sm">No vouchers found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(v => {
+                const badgeColor = 
+                    v.status === 'Active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' :
+                    v.status === 'Used' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' :
+                    'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300';
+
+                return `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColor}">${v.status}</span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="editVoucher('${v.id}')" class="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteVoucher('${v.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl mb-3">
+                                <span class="font-mono font-bold text-base text-emerald-600 dark:text-emerald-400 tracking-wider">${escapeHTML(v.code)}</span>
+                                <button onclick="copyVoucherCode('${escapeHTML(v.code)}')" class="p-2 text-slate-500 hover:text-emerald-600 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 mb-1">${escapeHTML(v.store)}</h4>
+                            <p class="text-xs font-medium text-slate-600 dark:text-slate-300 mb-3">
+                                Discount: <span class="font-bold text-emerald-600">${v.type === 'Percentage' ? v.value + '%' : formatCurrency(v.value, v.currency || 'HKD')} OFF</span>
+                                (Min: ${formatCurrency(v.minSpend || 0, v.currency || 'HKD')})
+                            </p>
+
+                            ${v.desc ? `<p class="text-xs text-slate-500 italic mb-3">"${escapeHTML(v.desc)}"</p>` : ''}
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                            <span>Expires: ${v.expiry || 'No expiry'}</span>
+                            <button onclick="toggleVoucherStatus('${v.id}')" class="text-emerald-600 font-medium hover:underline">Toggle Status</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openVoucherModal(voucherId = null) {
+            document.getElementById('voucher-form').reset();
+            document.getElementById('voucher-id').value = '';
+            document.getElementById('voucher-modal-title').innerText = 'Add Discount Voucher';
+
+            if (voucherId) {
+                const v = appData.vouchers.find(item => item.id === voucherId);
+                if (v) {
+                    document.getElementById('voucher-id').value = v.id;
+                    document.getElementById('voucher-store').value = v.store;
+                    document.getElementById('voucher-code').value = v.code;
+                    document.getElementById('voucher-currency').value = v.currency || 'HKD';
+                    document.getElementById('voucher-type').value = v.type;
+                    document.getElementById('voucher-value').value = v.value;
+                    document.getElementById('voucher-minspend').value = v.minSpend;
+                    document.getElementById('voucher-expiry').value = v.expiry || '';
+                    document.getElementById('voucher-status').value = v.status;
+                    document.getElementById('voucher-desc').value = v.desc || '';
+                    document.getElementById('voucher-modal-title').innerText = 'Edit Voucher';
+                }
+            }
+            document.getElementById('voucher-modal').classList.remove('hidden');
+            document.getElementById('voucher-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeVoucherModal() {
+            document.getElementById('voucher-modal').classList.add('hidden');
+            document.getElementById('voucher-modal').classList.remove('flex');
+        }
+
+        function handleVoucherSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('voucher-id').value;
+            const store = document.getElementById('voucher-store').value;
+            const code = document.getElementById('voucher-code').value;
+            const currency = document.getElementById('voucher-currency').value;
+            const type = document.getElementById('voucher-type').value;
+            const value = Number(document.getElementById('voucher-value').value);
+            const minSpend = Number(document.getElementById('voucher-minspend').value) || 0;
+            const expiry = document.getElementById('voucher-expiry').value;
+            const status = document.getElementById('voucher-status').value;
+            const desc = document.getElementById('voucher-desc').value;
+
+            if (id) {
+                const v = appData.vouchers.find(item => item.id === id);
+                if (v) {
+                    v.store = store; v.code = code; v.currency = currency; v.type = type;
+                    v.value = value; v.minSpend = minSpend; v.expiry = expiry; v.status = status; v.desc = desc;
+                    showToast('Voucher updated!');
+                }
+            } else {
+                appData.vouchers.unshift({ id: 'v_' + Date.now(), store, code, currency, type, value, minSpend, expiry, status, desc });
+                showToast('Voucher added!');
+            }
+
+            saveData(); closeVoucherModal(); renderVouchers(); renderDashboard();
+        }
+
+        function editVoucher(id) { openVoucherModal(id); }
+        function deleteVoucher(id) {
+            if (confirm('Delete voucher code?')) {
+                appData.vouchers = appData.vouchers.filter(v => v.id !== id);
+                saveData(); renderVouchers(); renderDashboard();
+                showToast('Voucher deleted.', 'error');
+            }
+        }
+        function toggleVoucherStatus(id) {
+            const v = appData.vouchers.find(item => item.id === id);
+            if (v) {
+                v.status = v.status === 'Active' ? 'Used' : 'Active';
+                saveData(); renderVouchers(); renderDashboard();
+            }
+        }
+        function copyVoucherCode(code) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => showToast(`Copied code: ${code}`));
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = code; document.body.appendChild(textArea);
+                textArea.select(); document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast(`Copied code: ${code}`);
+            }
+        }
+
+        /* PURCHASE HISTORY */
+        function renderPurchased() {
+            const tbody = document.getElementById('purchased-table-body');
+            const purchasedProducts = appData.products.filter(p => p.status === 'Purchased');
+
+            if (purchasedProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No purchased items recorded yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = purchasedProducts.map(p => {
+                const itemHkd = convertToHKD(p.price, p.currency);
+                const shipHkd = convertToHKD(p.shipping || 0, p.currency);
+                const totalHkd = itemHkd + shipHkd;
+                const purchaseDate = p.history && p.history.length > 0 ? p.history[p.history.length - 1].date : (p.createdAt || 'N/A');
+
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td class="p-4 font-semibold text-slate-800 dark:text-slate-100">${escapeHTML(p.name)}</td>
+                        <td class="p-4 text-slate-600 dark:text-slate-400">${escapeHTML(p.brand || 'N/A')}</td>
+                        <td class="p-4">${formatCurrency(p.price, p.currency)}</td>
+                        <td class="p-4">${formatCurrency(p.shipping || 0, p.currency)}</td>
+                        <td class="p-4 font-bold text-emerald-600 dark:text-emerald-400">${formatHKD(totalHkd)}</td>
+                        <td class="p-4 text-slate-500">${escapeHTML(purchaseDate)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /* EXCHANGE RATES */
+        function renderExchangeRatesForm() {
+            const formContainer = document.getElementById('exchange-rates-form');
+            const currencies = Object.keys(appData.exchangeRates);
+
+            formContainer.innerHTML = currencies.map(curr => {
+                if (curr === 'HKD') return '';
+                return `
+                    <div class="flex items-center justify-between gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                        <span class="font-bold text-sm">1 ${curr} =</span>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.0001" id="rate_${curr}" value="${appData.exchangeRates[curr]}" class="w-32 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <span class="text-sm font-semibold text-slate-500">HKD ($)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('') + `
+                <div class="flex items-center justify-between gap-4 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <span class="font-bold text-sm">HKD (Base Currency)</span>
+                    <span class="text-sm font-semibold text-slate-500">1.00 HKD</span>
+                </div>
+            `;
+        }
+
+        function saveExchangeRates() {
+            Object.keys(appData.exchangeRates).forEach(curr => {
+                if (curr !== 'HKD') {
+                    const input = document.getElementById(`rate_${curr}`);
+                    if (input && Number(input.value) > 0) appData.exchangeRates[curr] = Number(input.value);
+                }
+            });
+            saveData();
+            showToast('Exchange rates saved!');
+            renderDashboard();
+        }
+
+        /* JSON BACKUP WITH UNDERSCORE SUFFIX (omnitrack_backup_YYYY-MM-DD_a.json) */
+        function exportJSON() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            if (!appData.downloadLogs) appData.downloadLogs = {};
+            const currentCount = appData.downloadLogs[todayStr] || 0;
+            
+            // Suffix with underscore: 0 -> '_a', 1 -> '_b', 2 -> '_c'...
+            const suffixChar = String.fromCharCode(97 + (currentCount % 26));
+            const fileName = `omnitrack_backup_${todayStr}_${suffixChar}.json`;
+
+            appData.downloadLogs[todayStr] = currentCount + 1;
+            saveData();
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showToast(`Downloaded backup: ${fileName}`);
+        }
+
+        function importJSON(event) {
+            const fileReader = new FileReader();
+            if (event.target.files && event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0], "UTF-8");
+                fileReader.onload = (e) => {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (parsed && typeof parsed === 'object') {
+                            appData.products = parsed.products || [];
+                            appData.vouchers = parsed.vouchers || [];
+                            appData.deals = parsed.deals || [];
+                            appData.comparisons = parsed.comparisons || [];
+                            appData.splitterItems = parsed.splitterItems || [];
+                            appData.exchangeRates = { ...DEFAULT_EXCHANGE_RATES, ...(parsed.exchangeRates || {}) };
+                            appData.downloadLogs = parsed.downloadLogs || {};
+                            saveData();
+                            switchTab('dashboard');
+                            showToast('Data restored successfully!');
+                        }
+                    } catch (err) {
+                        showToast('Failed to parse JSON file.', 'error');
+                    }
+                };
+            }
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
+
+        window.onload = function() {
+            initTheme();
+            loadData();
+            switchTab('dashboard');
+        };
+    </script>
+</body>
+</html>
+```
