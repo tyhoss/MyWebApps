@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>總部工作紀錄及交接助手</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '"Noto Sans TC"', 'sans-serif'],
+          },
+          colors: {
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-800">
+
+  <!-- Top Header & Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+        <!-- Brand / Title -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">總部工作紀錄及交接助手</h1>
+              <p class="text-xs text-slate-500 hidden sm:block">Hybrid Step Tracker & WhatsApp Handover</p>
+            </div>
+          </div>
+          <!-- Local Privacy Badge on Mobile -->
+          <span class="sm:hidden inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <i data-lucide="shield-check" class="w-3 h-3"></i> 本機儲存
+          </span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/70 self-stretch sm:self-auto" aria-label="主要導覽">
+          <button onclick="switchTab('today')" id="nav-today" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all bg-white text-indigo-700 shadow-xs">
+            <i data-lucide="calendar-check" class="w-4 h-4"></i>
+            <span>今日工作</span>
+          </button>
+          <button onclick="switchTab('templates')" id="nav-templates" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+            <i data-lucide="layout-template" class="w-4 h-4"></i>
+            <span>範本庫</span>
+            <span id="template-count-badge" class="ml-0.5 text-xs bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+          <button onclick="switchTab('history')" id="nav-history" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+            <span>歷史留底</span>
+          </button>
+        </nav>
+
+        <!-- Desktop Privacy Badge -->
+        <div class="hidden md:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="所有資料僅儲存在你的瀏覽器本機，不會上傳至任何伺服器">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>純本機儲存・私隱安全</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+
+    <!-- ==================== TAB 1: 今日工作 (TODAY'S LOG) ==================== -->
+    <section id="view-today" class="space-y-5">
+      
+      <!-- Date & Quick Actions Toolbar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <label for="active-date" class="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
+            <span>紀錄日期：</span>
+          </label>
+          <div class="flex items-center gap-1.5">
+            <button onclick="changeDateBy(-1)" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors" title="前一日">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <input type="date" id="active-date" onchange="handleDateChange(this.value)" class="px-3 py-1.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            <button onclick="changeDateBy(1)" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors" title="後一日">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="setToday()" id="btn-back-today" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">
+              返回今日
+            </button>
+          </div>
+          <span id="date-weekday-label" class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg"></span>
+        </div>
+
+        <!-- Carry-over Unfinished Tasks Button -->
+        <div class="flex items-center gap-2">
+          <button onclick="carryOverTasks()" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100/80 transition-all shadow-2xs" title="從上一個有紀錄的工作日複製所有未完成事項到今日，原有日期的紀錄會完整保留作留底">
+            <i data-lucide="copy-plus" class="w-4 h-4 text-amber-600"></i>
+            <span>延續上次未完成事項</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Column / Responsive Grid Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- LEFT COLUMN (5 cols on lg): Task Composer / Editor -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <h2 id="form-heading" class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i>
+                <span>新增工作紀錄</span>
+              </h2>
+              <button type="button" id="btn-cancel-edit" onclick="resetTaskForm()" class="hidden text-xs font-medium text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors">
+                取消編輯
+              </button>
+            </div>
+
+            <!-- Quick Template Pills -->
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-medium text-slate-500 flex items-center gap-1">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i> 一鍵套用範本：
+                </span>
+                <button type="button" onclick="switchTab('templates')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                  管理範本 &rarr;
+                </button>
+              </div>
+              <div id="quick-templates-bar" class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <form id="task-form" onsubmit="handleSaveTask(event)" class="space-y-3.5">
+              <input type="hidden" id="edit-task-id" value="" />
+
+              <!-- Category / Tag Selector -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">工作分類 / Tag</label>
+                <div id="preset-tags-container" class="flex flex-wrap gap-1.5 mb-2">
+                  <!-- Preset tag pills rendered by JS -->
+                </div>
+                <input type="text" id="task-tag" placeholder="或直接輸入自訂分類（例如：Finance、904、Inquiry）" required
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+              </div>
+
+              <!-- Task Title -->
+              <div>
+                <label for="task-title" class="block text-xs font-semibold text-slate-700 mb-1">事項標題 <span class="text-rose-500">*</span></label>
+                <input type="text" id="task-title" placeholder="例如：處理本月報銷單據 / 搵老細簽 Payment" required
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+              </div>
+
+              <!-- Hybrid Step Tracker: Interactive Checklist Builder -->
+              <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="list-checks" class="w-3.5 h-3.5 text-indigo-600"></i>
+                    <span>步驟清單 (Checkbox 進度追蹤)</span>
+                  </label>
+                  <button type="button" onclick="addStepInputRow()" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> 加一步驟
+                  </button>
+                </div>
+                
+                <div id="form-steps-list" class="space-y-2">
+                  <!-- Step input rows go here -->
+                </div>
+                <p id="steps-empty-hint" class="text-xs text-slate-400 italic py-1">可留空（純用下方文字記錄），或按「加一步驟」建立可剔選進度條。</p>
+              </div>
+
+              <!-- Free-text Status / Progress Note -->
+              <div>
+                <label for="task-status-note" class="block text-xs font-semibold text-slate-700 mb-1">最新情況 / 補充說明（自由打字）</label>
+                <textarea id="task-status-note" rows="2" placeholder="例如：已核對單據並入系統，老細今日開會未簽得..."
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"></textarea>
+              </div>
+
+              <!-- Handover Note / Next Action -->
+              <div>
+                <label for="task-handover-note" class="block text-xs font-semibold text-slate-700 mb-1">交接備註 / 下一步提示</label>
+                <input type="text" id="task-handover-note" placeholder="例如：文件放喺紅色 File 夾，批核後轉交 Finance 蘇生"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+              </div>
+
+              <!-- Manual Status Toggle (especially useful when there are 0 checkboxes) -->
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-xs font-medium text-slate-600">狀態標記：</span>
+                <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/70">
+                  <label class="cursor-pointer">
+                    <input type="radio" name="task-manual-status" value="pending" checked class="sr-only peer" />
+                    <span class="block px-3 py-1 rounded-lg text-xs font-medium text-slate-600 peer-checked:bg-amber-500 peer-checked:text-white transition-all">
+                      ⏳ 跟進中 / 需交接
+                    </span>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input type="radio" name="task-manual-status" value="completed" class="sr-only peer" />
+                    <span class="block px-3 py-1 rounded-lg text-xs font-medium text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white transition-all">
+                      ✅ 已完成
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Form Action Buttons -->
+              <div class="pt-2 flex flex-col sm:flex-row gap-2">
+                <button type="submit" id="btn-submit-task" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 transition-all shadow-xs">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                  <span>儲存工作紀錄</span>
+                </button>
+                <button type="button" onclick="saveCurrentFormAsTemplate()" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-all" title="將目前輸入的分類、標題及步驟另存為常用範本">
+                  <i data-lucide="bookmark-plus" class="w-4 h-4 text-indigo-600"></i>
+                  <span>另存為範本</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN (7 cols on lg): Task List + WhatsApp Generator -->
+        <div class="lg:col-span-7 space-y-5">
+          
+          <!-- Task Cards Container -->
+          <div class="space-y-4">
+            <!-- Section 1: In Progress / Needs Handover -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-3.5">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  <span>跟進中 / 需交接</span>
+                  <span id="pending-count" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">0</span>
+                </h3>
+                <span class="text-xs text-slate-400">可直接剔選步驟更新進度</span>
+              </div>
+
+              <div id="pending-tasks-list" class="space-y-3">
+                <!-- Pending task cards injected here -->
+              </div>
+            </div>
+
+            <!-- Section 2: Completed Today -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-3.5">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span>今日已完成</span>
+                  <span id="completed-count" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0</span>
+                </h3>
+              </div>
+
+              <div id="completed-tasks-list" class="space-y-3">
+                <!-- Completed task cards injected here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp Handover Message Generator Panel -->
+          <div class="bg-white rounded-2xl border border-emerald-200/90 p-4 sm:p-5 shadow-xs ring-1 ring-emerald-500/10">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                  <i data-lucide="message-square-share" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900">WhatsApp 交接訊息生成器</h3>
+                  <p class="text-xs text-slate-500">自動整理進度與下一步，放工一鍵複製發送</p>
+                </div>
+              </div>
+              <button onclick="copyWhatsAppMessage()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 transition-all shadow-xs">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                <span>一鍵複製 WhatsApp 訊息</span>
+              </button>
+            </div>
+
+            <!-- Generator Options -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3 bg-slate-50 p-3 rounded-xl border border-slate-200/70">
+              <div>
+                <label for="wa-header-title" class="block text-xs font-medium text-slate-600 mb-1">訊息標題 / 稱呼</label>
+                <input type="text" id="wa-header-title" value="總部工作紀錄及交接" oninput="updateWhatsAppPreview()"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-emerald-500" />
+              </div>
+              <div>
+                <label for="wa-signoff" class="block text-xs font-medium text-slate-600 mb-1">結尾語（可自訂或留空）</label>
+                <input type="text" id="wa-signoff" value="如有問題隨時 WhatsApp 我，唔該晒！🙏" oninput="updateWhatsAppPreview()"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-emerald-500" />
+              </div>
+              <div class="sm:col-span-2 flex flex-wrap items-center gap-4 pt-0.5">
+                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                  <input type="checkbox" id="wa-include-completed" checked onchange="updateWhatsAppPreview()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                  <span>包含「今日已完成」項目</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                  <input type="checkbox" id="wa-include-done-steps" checked onchange="updateWhatsAppPreview()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                  <span>顯示已完成之細項步驟</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Live Preview Textarea -->
+            <div class="relative">
+              <textarea id="wa-preview-box" rows="10" readonly
+                class="w-full p-3.5 rounded-xl bg-emerald-50/40 border border-emerald-200/80 text-xs sm:text-sm font-mono text-slate-800 leading-relaxed focus:outline-none resize-y"></textarea>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: 範本庫 (TEMPLATES MANAGER) ==================== -->
+    <section id="view-templates" class="hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- Create / Edit Template Form -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+          <div class="flex items-center justify-between mb-3">
+            <h2 id="tpl-form-heading" class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-600"></i>
+              <span>建立新工作範本</span>
+            </h2>
+            <button type="button" id="btn-cancel-tpl-edit" onclick="resetTemplateForm()" class="hidden text-xs font-medium text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg bg-slate-100">
+              取消編輯
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mb-4">將重複性高嘅總部行政程序存為範本，下次返工一撳即用。</p>
+
+          <form id="template-form" onsubmit="handleSaveTemplate(event)" class="space-y-3.5">
+            <input type="hidden" id="edit-tpl-id" value="" />
+            
+            <div>
+              <label for="tpl-tag" class="block text-xs font-semibold text-slate-700 mb-1">預設分類 / Tag <span class="text-rose-500">*</span></label>
+              <input type="text" id="tpl-tag" placeholder="例如：Finance / Claim、HR / 904、General" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label for="tpl-title" class="block text-xs font-semibold text-slate-700 mb-1">預設事項標題 <span class="text-rose-500">*</span></label>
+              <input type="text" id="tpl-title" placeholder="例如：處理報銷及 Payment 單據" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-semibold text-slate-700">預設 SOP 步驟清單</label>
+                <button type="button" onclick="addTplStepInputRow()" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> 加一步驟
+                </button>
+              </div>
+              <div id="tpl-steps-list" class="space-y-2">
+                <!-- Template step rows -->
+              </div>
+            </div>
+
+            <div>
+              <label for="tpl-handover-note" class="block text-xs font-semibold text-slate-700 mb-1">預設交接提示（選填）</label>
+              <input type="text" id="tpl-handover-note" placeholder="例如：批核後記得影印留底先交去 Finance"
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+            </div>
+
+            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-xs">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>儲存範本</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Saved Templates List -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-800">已儲存的工作範本</h2>
+                <p class="text-xs text-slate-500">點擊「立即套用」可直接帶入今日工作清單</p>
+              </div>
+            </div>
+
+            <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <!-- Templates rendered here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: 歷史留底與備份 (AUDIT LOG & BACKUP) ==================== -->
+    <section id="view-history" class="hidden space-y-5">
+      
+      <!-- Data Portability & Backup Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="database-backup" class="w-4 h-4 text-indigo-600"></i>
+              <span>工作留痕匯出及資料備份</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">定期匯出備份以防瀏覽器清除緩存，或匯出 Markdown / CSV 作個人工作表現紀錄（Appraisal / 留底）。</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="exportMarkdown()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-colors">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span>匯出 Markdown (.md)</span>
+            </button>
+            <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-colors">
+              <i data-lucide="table" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>匯出 Excel / CSV</span>
+            </button>
+            <button onclick="exportJSONBackup()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>下載完整備份 (.json)</span>
+            </button>
+            <label class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white text-slate-700 hover:bg-slate-50 border border-slate-300 cursor-pointer transition-colors">
+              <i data-lucide="upload" class="w-3.5 h-3.5 text-amber-600"></i>
+              <span>還原備份 (.json)</span>
+              <input type="file" accept=".json" onchange="importJSONBackup(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-6 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="history-search" placeholder="搜尋關鍵字（標題、步驟內容、備註、人名...）" oninput="renderHistoryList()"
+              class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
+          </div>
+          <div class="sm:col-span-3">
+            <select id="history-tag-filter" onchange="renderHistoryList()"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-indigo-500">
+              <option value="ALL">所有工作分類 (All Tags)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <select id="history-status-filter" onchange="renderHistoryList()"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-indigo-500">
+              <option value="ALL">所有狀態 (全部紀錄)</option>
+              <option value="pending">⏳ 當時未完成 / 交接中</option>
+              <option value="completed">✅ 已完成</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chronological Audit Log List -->
+      <div id="history-log-container" class="space-y-4">
+        <!-- Populated dynamically -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Confirmation Modal (Custom UI instead of window.confirm) -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-5 shadow-xl">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="confirm-modal-title" class="text-base font-bold text-slate-900">確認操作</h3>
+          <p id="confirm-modal-desc" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed"></p>
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeConfirmModal()" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
+          取消
+        </button>
+        <button id="confirm-modal-btn" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 transition-colors">
+          確定
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE & DEFAULT DATA ====================
+    const STORAGE_KEY_TASKS = 'hq_handover_tasks_v1';
+    const STORAGE_KEY_TEMPLATES = 'hq_handover_templates_v1';
+    const STORAGE_KEY_SETTINGS = 'hq_handover_settings_v1';
+
+    const PRESET_TAGS = [
+      'General Registry',
+      'HR / 904',
+      'Finance / Claim',
+      'Procurement',
+      'Public Inquiry',
+      'Ad-hoc'
+    ];
+
+    const DEFAULT_TEMPLATES = [
+      {
+        id: 'tpl-default-1',
+        tag: 'Finance / Claim',
+        title: '處理報銷及 Payment 單據',
+        steps: [
+          '核對單據金額及收據正本',
+          '輸入系統並列印 Cover Sheet',
+          '交由老細簽批',
+          '轉交 Finance 跟進及影印留底'
+        ],
+        handoverNote: '批核後記得影印一份放喺部門 File 夾留底'
+      },
+      {
+        id: 'tpl-default-2',
+        tag: 'HR / 904',
+        title: '904 假期表格紀錄及歸檔',
+        steps: [
+          '點算及收集本週同事遞交之 904 表格',
+          '核對假期餘額及主管簽署',
+          '輸入系統紀錄',
+          '放入個人檔案夾歸檔'
+        ],
+        handoverNote: '如有未補交簽名嘅表格，放喺待處理托盤'
+      },
+      {
+        id: 'tpl-default-3',
+        tag: 'General Registry',
+        title: '掛號信件登記及郵票盤點',
+        steps: [
+          '登記收發掛號信件於 Logbook',
+          '交由信差 / 安排寄出',
+          '點算郵票結餘並更新紀錄表'
+        ],
+        handoverNote: '郵票櫃鎖匙放喺抽屜第二格'
+      }
+    ];
+
+    let tasks = [];
+    let templates = [];
+    let activeDate = getTodayDateStr();
+    let confirmCallback = null;
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      document.getElementById('active-date').value = activeDate;
+      updateDateDisplayUI();
+      renderPresetTags();
+      renderQuickTemplatesBar();
+      renderTasksForActiveDate();
+      renderTemplatesManager();
+      updateWhatsAppPreview();
+      lucide.createIcons();
+    });
+
+    function getTodayDateStr() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset();
+      const local = new Date(now.getTime() - (offset * 60 * 1000));
+      return local.toISOString().split('T')[0];
+    }
+
+    function loadFromStorage() {
+      try {
+        const rawTasks = localStorage.getItem(STORAGE_KEY_TASKS);
+        tasks = rawTasks ? JSON.parse(rawTasks) : [];
+
+        const rawTemplates = localStorage.getItem(STORAGE_KEY_TEMPLATES);
+        if (rawTemplates) {
+          templates = JSON.parse(rawTemplates);
+        } else {
+          templates = [...DEFAULT_TEMPLATES];
+          saveTemplatesToStorage();
+        }
+
+        const rawSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
+        if (rawSettings) {
+          const settings = JSON.parse(rawSettings);
+          if (settings.waHeaderTitle !== undefined) document.getElementById('wa-header-title').value = settings.waHeaderTitle;
+          if (settings.waSignoff !== undefined) document.getElementById('wa-signoff').value = settings.waSignoff;
+          if (settings.waIncludeCompleted !== undefined) document.getElementById('wa-include-completed').checked = settings.waIncludeCompleted;
+          if (settings.waIncludeDoneSteps !== undefined) document.getElementById('wa-include-done-steps').checked = settings.waIncludeDoneSteps;
+        }
+      } catch (e) {
+        console.error('Failed to load storage:', e);
+        showToast('讀取本機資料時發生錯誤', 'error');
+      }
+    }
+
+    function saveTasksToStorage() {
+      localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+    }
+
+    function saveTemplatesToStorage() {
+      localStorage.setItem(STORAGE_KEY_TEMPLATES, JSON.stringify(templates));
+      document.getElementById('template-count-badge').textContent = templates.length;
+    }
+
+    function saveSettingsToStorage() {
+      const settings = {
+        waHeaderTitle: document.getElementById('wa-header-title').value,
+        waSignoff: document.getElementById('wa-signoff').value,
+        waIncludeCompleted: document.getElementById('wa-include-completed').checked,
+        waIncludeDoneSteps: document.getElementById('wa-include-done-steps').checked
+      };
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    }
+
+    // ==================== NAVIGATION & DATE HANDLING ====================
+    function switchTab(tabName) {
+      ['today', 'templates', 'history'].forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        const navEl = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          viewEl.classList.remove('hidden');
+          navEl.classList.add('bg-white', 'text-indigo-700', 'shadow-xs');
+          navEl.classList.remove('text-slate-600', 'hover:text-slate-900');
+        } else {
+          viewEl.classList.add('hidden');
+          navEl.classList.remove('bg-white', 'text-indigo-700', 'shadow-xs');
+          navEl.classList.add('text-slate-600', 'hover:text-slate-900');
+        }
+      });
+
+      if (tabName === 'history') {
+        populateHistoryTagFilter();
+        renderHistoryList();
+      } else if (tabName === 'templates') {
+        renderTemplatesManager();
+      } else if (tabName === 'today') {
+        renderQuickTemplatesBar();
+        renderTasksForActiveDate();
+        updateWhatsAppPreview();
+      }
+      lucide.createIcons();
+    }
+
+    function handleDateChange(newDate) {
+      if (!newDate) return;
+      activeDate = newDate;
+      updateDateDisplayUI();
+      resetTaskForm();
+      renderTasksForActiveDate();
+      updateWhatsAppPreview();
+    }
+
+    function changeDateBy(days) {
+      const d = new Date(activeDate + 'T00:00:00');
+      d.setDate(d.getDate() + days);
+      const offset = d.getTimezoneOffset();
+      const local = new Date(d.getTime() - (offset * 60 * 1000));
+      const newStr = local.toISOString().split('T')[0];
+      document.getElementById('active-date').value = newStr;
+      handleDateChange(newStr);
+    }
+
+    function setToday() {
+      const today = getTodayDateStr();
+      document.getElementById('active-date').value = today;
+      handleDateChange(today);
+    }
+
+    function updateDateDisplayUI() {
+      const today = getTodayDateStr();
+      const backBtn = document.getElementById('btn-back-today');
+      if (activeDate !== today) {
+        backBtn.classList.remove('hidden');
+      } else {
+        backBtn.classList.add('hidden');
+      }
+
+      const d = new Date(activeDate + 'T00:00:00');
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const label = activeDate === today ? `今日・${weekdays[d.getDay()]}` : weekdays[d.getDay()];
+      document.getElementById('date-weekday-label').textContent = label;
+    }
+
+    // ==================== PRESET TAGS & QUICK TEMPLATES ====================
+    function renderPresetTags() {
+      const container = document.getElementById('preset-tags-container');
+      container.innerHTML = PRESET_TAGS.map(tag => `
+        <button type="button" onclick="selectPresetTag('${escapeHtml(tag)}')"
+          class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200/80 transition-colors">
+          ${escapeHtml(tag)}
+        </button>
+      `).join('');
+    }
+
+    function selectPresetTag(tag) {
+      document.getElementById('task-tag').value = tag;
+    }
+
+    function renderQuickTemplatesBar() {
+      const bar = document.getElementById('quick-templates-bar');
+      document.getElementById('template-count-badge').textContent = templates.length;
+
+      if (templates.length === 0) {
+        bar.innerHTML = `<span class="text-xs text-slate-400">未有範本，可按右上方「管理範本」建立</span>`;
+        return;
+      }
+
+      bar.innerHTML = templates.map(tpl => `
+        <button type="button" onclick="applyTemplateToForm('${tpl.id}')"
+          class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80 transition-colors">
+          <i data-lucide="plus" class="w-3 h-3"></i>
+          <span>${escapeHtml(tpl.title)}</span>
+        </button>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function applyTemplateToForm(tplId) {
+      const tpl = templates.find(t => t.id === tplId);
+      if (!tpl) return;
+
+      resetTaskForm();
+      document.getElementById('task-tag').value = tpl.tag;
+      document.getElementById('task-title').value = tpl.title;
+      document.getElementById('task-handover-note').value = tpl.handoverNote || '';
+
+      const stepsContainer = document.getElementById('form-steps-list');
+      stepsContainer.innerHTML = '';
+      if (tpl.steps && tpl.steps.length > 0) {
+        tpl.steps.forEach(stepText => {
+          addStepInputRow(stepText, false);
+        });
+      }
+      updateStepsEmptyHint();
+      showToast(`已套用範本：「${tpl.title}」`, 'info');
+    }
+
+    // ==================== TASK FORM & CHECKLIST BUILDER ====================
+    function addStepInputRow(text = '', done = false) {
+      const container = document.getElementById('form-steps-list');
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 step-input-row';
+      row.innerHTML = `
+        <input type="checkbox" ${done ? 'checked' : ''} class="step-done-cb w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0" title="標記此步驟是否已完成" />
+        <input type="text" value="${escapeHtml(text)}" placeholder="輸入步驟內容（例如：交老細簽批）"
+          class="step-text-input flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500" />
+        <button type="button" onclick="moveStepRow(this, -1)" class="p-1 text-slate-400 hover:text-slate-700" title="上移">
+          <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+        </button>
+        <button type="button" onclick="moveStepRow(this, 1)" class="p-1 text-slate-400 hover:text-slate-700" title="下移">
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+        </button>
+        <button type="button" onclick="removeStepRow(this)" class="p-1 text-slate-400 hover:text-rose-600" title="刪除步驟">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      `;
+      container.appendChild(row);
+      updateStepsEmptyHint();
+      lucide.createIcons();
+    }
+
+    function moveStepRow(btn, dir) {
+      const row = btn.closest('.step-input-row');
+      const container = document.getElementById('form-steps-list');
+      if (dir === -1 && row.previousElementSibling) {
+        container.insertBefore(row, row.previousElementSibling);
+      } else if (dir === 1 && row.nextElementSibling) {
+        container.insertBefore(row.nextElementSibling, row);
+      }
+    }
+
+    function removeStepRow(btn) {
+      btn.closest('.step-input-row').remove();
+      updateStepsEmptyHint();
+    }
+
+    function updateStepsEmptyHint() {
+      const count = document.querySelectorAll('#form-steps-list .step-input-row').length;
+      const hint = document.getElementById('steps-empty-hint');
+      if (count > 0) {
+        hint.classList.add('hidden');
+      } else {
+        hint.classList.remove('hidden');
+      }
+    }
+
+    function collectFormSteps() {
+      const rows = document.querySelectorAll('#form-steps-list .step-input-row');
+      const steps = [];
+      rows.forEach(row => {
+        const text = row.querySelector('.step-text-input').value.trim();
+        const done = row.querySelector('.step-done-cb').checked;
+        if (text) {
+          steps.push({ id: 'step-' + Math.random().toString(36).substr(2, 9), text, done });
+        }
+      });
+      return steps;
+    }
+
+    function handleSaveTask(e) {
+      e.preventDefault();
+      const editId = document.getElementById('edit-task-id').value;
+      const tag = document.getElementById('task-tag').value.trim() || 'General';
+      const title = document.getElementById('task-title').value.trim();
+      const statusNote = document.getElementById('task-status-note').value.trim();
+      const handoverNote = document.getElementById('task-handover-note').value.trim();
+      const steps = collectFormSteps();
+      const manualStatus = document.querySelector('input[name="task-manual-status"]:checked').value;
+
+      if (!title) return;
+
+      // Auto-detect status if steps exist, unless user explicitly marked completed
+      let isCompleted = false;
+      if (steps.length > 0) {
+        isCompleted = steps.every(s => s.done);
+      } else {
+        isCompleted = (manualStatus === 'completed');
+      }
+
+      if (editId) {
+        const idx = tasks.findIndex(t => t.id === editId);
+        if (idx !== -1) {
+          tasks[idx] = {
+            ...tasks[idx],
+            tag,
+            title,
+            steps,
+            statusNote,
+            handoverNote,
+            completed: isCompleted,
+            updatedAt: new Date().toISOString()
+          };
+          showToast('已更新工作紀錄', 'success');
+        }
+      } else {
+        const newTask = {
+          id: 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+          date: activeDate,
+          tag,
+          title,
+          steps,
+          statusNote,
+          handoverNote,
+          completed: isCompleted,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        tasks.push(newTask);
+        showToast('已新增工作紀錄', 'success');
+      }
+
+      saveTasksToStorage();
+      resetTaskForm();
+      renderTasksForActiveDate();
+      updateWhatsAppPreview();
+    }
+
+    function resetTaskForm() {
+      document.getElementById('edit-task-id').value = '';
+      document.getElementById('task-form').reset();
+      document.getElementById('form-steps-list').innerHTML = '';
+      updateStepsEmptyHint();
+      document.getElementById('form-heading').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-indigo-600"></i><span>新增工作紀錄</span>`;
+      document.getElementById('btn-submit-task').innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>儲存工作紀錄</span>`;
+      document.getElementById('btn-cancel-edit').classList.add('hidden');
+      lucide.createIcons();
+    }
+
+    function editTask(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('edit-task-id').value = task.id;
+      document.getElementById('task-tag').value = task.tag;
+      document.getElementById('task-title').value = task.title;
+      document.getElementById('task-status-note').value = task.statusNote || '';
+      document.getElementById('task-handover-note').value = task.handoverNote || '';
+
+      const statusRadio = document.querySelector(`input[name="task-manual-status"][value="${task.completed ? 'completed' : 'pending'}"]`);
+      if (statusRadio) statusRadio.checked = true;
+
+      const stepsContainer = document.getElementById('form-steps-list');
+      stepsContainer.innerHTML = '';
+      if (task.steps && task.steps.length > 0) {
+        task.steps.forEach(s => addStepInputRow(s.text, s.done));
+      }
+      updateStepsEmptyHint();
+
+      document.getElementById('form-heading').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-amber-600"></i><span>編輯工作紀錄</span>`;
+      document.getElementById('btn-submit-task').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i><span>更新紀錄</span>`;
+      document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      lucide.createIcons();
+
+      // Scroll smoothly to form on mobile
+      document.getElementById('task-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ==================== SAVE AS TEMPLATE (FROM FORM OR CARD) ====================
+    function saveCurrentFormAsTemplate() {
+      const tag = document.getElementById('task-tag').value.trim() || 'General';
+      const title = document.getElementById('task-title').value.trim();
+      const handoverNote = document.getElementById('task-handover-note').value.trim();
+      const steps = collectFormSteps().map(s => s.text);
+
+      if (!title) {
+        showToast('請先輸入「事項標題」先可以另存為範本', 'error');
+        return;
+      }
+
+      const newTpl = {
+        id: 'tpl-' + Date.now(),
+        tag,
+        title,
+        steps,
+        handoverNote
+      };
+      templates.unshift(newTpl);
+      saveTemplatesToStorage();
+      renderQuickTemplatesBar();
+      showToast(`已將「${title}」存入範本庫！`, 'success');
+    }
+
+    function saveTaskCardAsTemplate(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const newTpl = {
+        id: 'tpl-' + Date.now(),
+        tag: task.tag,
+        title: task.title,
+        steps: (task.steps || []).map(s => s.text),
+        handoverNote: task.handoverNote || ''
+      };
+      templates.unshift(newTpl);
+      saveTemplatesToStorage();
+      renderQuickTemplatesBar();
+      showToast(`已將「${task.title}」另存為範本！`, 'success');
+    }
+
+    // ==================== TASK CARDS RENDERING & INTERACTIONS ====================
+    function renderTasksForActiveDate() {
+      const dayTasks = tasks.filter(t => t.date === activeDate);
+      const pendingTasks = dayTasks.filter(t => !t.completed);
+      const completedTasks = dayTasks.filter(t => t.completed);
+
+      document.getElementById('pending-count').textContent = pendingTasks.length;
+      document.getElementById('completed-count').textContent = completedTasks.length;
+
+      const pendingListEl = document.getElementById('pending-tasks-list');
+      const completedListEl = document.getElementById('completed-tasks-list');
+
+      if (pendingTasks.length === 0) {
+        pendingListEl.innerHTML = `
+          <div class="text-center py-6 px-4 rounded-xl bg-slate-50 border border-dashed border-slate-200">
+            <p class="text-xs sm:text-sm text-slate-500">暫時未有跟進中 / 需交接事項</p>
+            <p class="text-xs text-slate-400 mt-1">可於左方新增，或按上方「延續上次未完成事項」匯入</p>
+          </div>
+        `;
+      } else {
+        pendingListEl.innerHTML = pendingTasks.map(task => createTaskCardHTML(task)).join('');
+      }
+
+      if (completedTasks.length === 0) {
+        completedListEl.innerHTML = `
+          <div class="text-center py-4 px-4 rounded-xl bg-slate-50/60 border border-dashed border-slate-200/80">
+            <p class="text-xs text-slate-400">尚未有標記為已完成的工作</p>
+          </div>
+        `;
+      } else {
+        completedListEl.innerHTML = completedTasks.map(task => createTaskCardHTML(task)).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function createTaskCardHTML(task) {
+      const hasSteps = task.steps && task.steps.length > 0;
+      const doneStepsCount = hasSteps ? task.steps.filter(s => s.done).length : 0;
+      const totalStepsCount = hasSteps ? task.steps.length : 0;
+      const progressPercent = hasSteps ? Math.round((doneStepsCount / totalStepsCount) * 100) : (task.completed ? 100 : 0);
+
+      // Find next pending step
+      const nextStep = hasSteps ? task.steps.find(s => !s.done) : null;
+
+      return `
+        <div class="rounded-xl border ${task.completed ? 'border-emerald-200/80 bg-emerald-50/20' : 'border-slate-200 bg-white'} p-3.5 sm:p-4 shadow-2xs transition-all hover:border-slate-300">
+          <!-- Card Header -->
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${task.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-700 border border-indigo-100'}">
+                ${escapeHtml(task.tag)}
+              </span>
+              ${hasSteps ? `
+                <span class="text-xs font-medium px-2 py-0.5 rounded-md ${task.completed ? 'bg-emerald-100/70 text-emerald-700' : 'bg-amber-50 text-amber-700 border border-amber-200/60'}">
+                  進度：${doneStepsCount}/${totalStepsCount} 步
+                </span>
+              ` : ''}
+            </div>
+
+            <!-- Card Action Buttons -->
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="toggleTaskCompletion('${task.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="${task.completed ? '標記為跟進中' : '一鍵標記為已完成'}">
+                <i data-lucide="${task.completed ? 'rotate-ccw' : 'check-circle-2'}" class="w-4 h-4"></i>
+              </button>
+              <button onclick="saveTaskCardAsTemplate('${task.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="另存為範本">
+                <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+              </button>
+              <button onclick="editTask('${task.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" title="編輯">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+              </button>
+              <button onclick="confirmDeleteTask('${task.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="刪除">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <h4 class="text-sm sm:text-base font-bold mt-1.5 ${task.completed ? 'text-slate-600 line-through decoration-slate-400' : 'text-slate-900'}">
+            ${escapeHtml(task.title)}
+          </h4>
+
+          <!-- Progress Bar if steps exist -->
+          ${hasSteps ? `
+            <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div class="${task.completed ? 'bg-emerald-500' : 'bg-indigo-600'} h-1.5 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+            </div>
+          ` : ''}
+
+          <!-- Interactive Checkboxes -->
+          ${hasSteps ? `
+            <div class="mt-3 space-y-1.5 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+              ${task.steps.map((step, idx) => `
+                <label class="flex items-start gap-2.5 cursor-pointer group py-0.5">
+                  <input type="checkbox" ${step.done ? 'checked' : ''} onchange="toggleTaskStep('${task.id}', ${idx})"
+                    class="mt-0.5 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0" />
+                  <span class="text-xs sm:text-sm leading-snug transition-colors ${step.done ? 'line-through text-slate-400' : 'text-slate-700 group-hover:text-slate-900 font-medium'}">
+                    ${escapeHtml(step.text)}
+                  </span>
+                </label>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Status Note & Handover Note -->
+          <div class="mt-2.5 space-y-1.5 text-xs">
+            ${task.statusNote ? `
+              <div class="flex items-start gap-1.5 text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg">
+                <span class="font-semibold text-slate-700 shrink-0">📝 情況：</span>
+                <span class="leading-relaxed">${escapeHtml(task.statusNote)}</span>
+              </div>
+            ` : ''}
+
+            ${(!task.completed && nextStep) ? `
+              <div class="flex items-start gap-1.5 text-indigo-800 bg-indigo-50/70 px-2.5 py-1.5 rounded-lg">
+                <span class="font-semibold shrink-0">👉 下一步：</span>
+                <span class="leading-relaxed font-medium">${escapeHtml(nextStep.text)}</span>
+              </div>
+            ` : ''}
+
+            ${task.handoverNote ? `
+              <div class="flex items-start gap-1.5 text-amber-800 bg-amber-50/80 px-2.5 py-1.5 rounded-lg border border-amber-200/50">
+                <span class="font-semibold shrink-0">💡 交接備註：</span>
+                <span class="leading-relaxed">${escapeHtml(task.handoverNote)}</span>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTaskStep(taskId, stepIndex) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.steps || !task.steps[stepIndex]) return;
+
+      task.steps[stepIndex].done = !task.steps[stepIndex].done;
+      // Automatically update overall completion status based on whether all steps are checked
+      task.completed = task.steps.every(s => s.done);
+      task.updatedAt = new Date().toISOString();
+
+      saveTasksToStorage();
+      renderTasksForActiveDate();
+      updateWhatsAppPreview();
+    }
+
+    function toggleTaskCompletion(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      task.completed = !task.completed;
+      if (task.steps && task.steps.length > 0) {
+        task.steps.forEach(s => s.done = task.completed);
+      }
+      task.updatedAt = new Date().toISOString();
+
+      saveTasksToStorage();
+      renderTasksForActiveDate();
+      updateWhatsAppPreview();
+      showToast(task.completed ? '已移至「今日已完成」' : '已移回「跟進中」', 'info');
+    }
+
+    function confirmDeleteTask(taskId) {
+      openConfirmModal(
+        '刪除工作紀錄',
+        '確定要刪除此項工作紀錄嗎？刪除後將無法復原。',
+        () => {
+          tasks = tasks.filter(t => t.id !== taskId);
+          saveTasksToStorage();
+          renderTasksForActiveDate();
+          updateWhatsAppPreview();
+          showToast('已刪除工作紀錄', 'info');
+        }
+      );
+    }
+
+    // ==================== CARRY-OVER UNFINISHED TASKS ====================
+    function carryOverTasks() {
+      // Find the most recent date before activeDate that has tasks
+      const previousDates = [...new Set(tasks.filter(t => t.date < activeDate).map(t => t.date))].sort().reverse();
+      
+      if (previousDates.length === 0) {
+        showToast('找不到比目前日期更早的工作紀錄', 'error');
+        return;
+      }
+
+      const lastDate = previousDates[0];
+      const unfinishedFromLast = tasks.filter(t => t.date === lastDate && !t.completed);
+
+      if (unfinishedFromLast.length === 0) {
+        showToast(`上一個紀錄日 (${formatDisplayDate(lastDate)}) 所有事項已全部完成！`, 'info');
+        return;
+      }
+
+      // Check duplicates already carried over today
+      const todayTitles = new Set(tasks.filter(t => t.date === activeDate).map(t => t.title));
+      let addedCount = 0;
+
+      unfinishedFromLast.forEach(oldTask => {
+        if (!todayTitles.has(oldTask.title)) {
+          const clonedTask = {
+            ...JSON.parse(JSON.stringify(oldTask)),
+            id: 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+            date: activeDate,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          tasks.push(clonedTask);
+          addedCount++;
+        }
+      });
+
+      if (addedCount === 0) {
+        showToast('上次未完成事項已經存在於今日清單中', 'info');
+        return;
+      }
+
+      saveTasksToStorage();
+      renderTasksForActiveDate();
+      updateWhatsAppPreview();
+      showToast(`已從 ${formatDisplayDate(lastDate)} 延續 ${addedCount} 項未完成工作（舊紀錄已保留留底）`, 'success');
+    }
+
+    // ==================== WHATSAPP MESSAGE GENERATOR ====================
+    function updateWhatsAppPreview() {
+      saveSettingsToStorage();
+
+      const headerTitle = document.getElementById('wa-header-title').value.trim() || '總部工作紀錄及交接';
+      const signoff = document.getElementById('wa-signoff').value.trim();
+      const includeCompleted = document.getElementById('wa-include-completed').checked;
+      const includeDoneSteps = document.getElementById('wa-include-done-steps').checked;
+
+      const dayTasks = tasks.filter(t => t.date === activeDate);
+      const pendingTasks = dayTasks.filter(t => !t.completed);
+      const completedTasks = dayTasks.filter(t => t.completed);
+
+      const d = new Date(activeDate + 'T00:00:00');
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const shortDate = `${d.getDate()}/${d.getMonth() + 1} (星期${weekdays[d.getDay()]})`;
+
+      let lines = [];
+      lines.push(`📋 *${headerTitle} (${shortDate})*`);
+      lines.push('');
+
+      if (dayTasks.length === 0) {
+        lines.push('（今日暫無工作紀錄）');
+      } else {
+        // Pending / Handover section
+        if (pendingTasks.length > 0) {
+          lines.push(`⏳ *【跟進中 / 需交接】*`);
+          pendingTasks.forEach((task, idx) => {
+            const hasSteps = task.steps && task.steps.length > 0;
+            const doneSteps = hasSteps ? task.steps.filter(s => s.done) : [];
+            const remainingSteps = hasSteps ? task.steps.filter(s => !s.done) : [];
+
+            const progressText = hasSteps ? ` (進度: ${doneSteps.length}/${task.steps.length})` : '';
+            lines.push(`${idx + 1}. *[${task.tag}]* ${task.title}${progressText}`);
+
+            if (hasSteps && includeDoneSteps && doneSteps.length > 0) {
+              lines.push(`   ✅ 已完成：${doneSteps.map(s => s.text).join('、')}`);
+            }
+
+            if (hasSteps && remainingSteps.length > 0) {
+              lines.push(`   👉 下一步：${remainingSteps.map(s => s.text).join(' ➔ ')}`);
+            }
+
+            if (task.statusNote) {
+              lines.push(`   ▫️ 情況：${task.statusNote}`);
+            }
+
+            if (task.handoverNote) {
+              lines.push(`   💡 備註：${task.handoverNote}`);
+            }
+            lines.push('');
+          });
+        } else {
+          lines.push(`⏳ *【跟進中 / 需交接】*`);
+          lines.push(`• 無（所有事項已處理完畢）`);
+          lines.push('');
+        }
+
+        // Completed section
+        if (includeCompleted) {
+          lines.push(`✅ *【今日已完成】*`);
+          if (completedTasks.length > 0) {
+            completedTasks.forEach(task => {
+              const hasSteps = task.steps && task.steps.length > 0;
+              const stepBadge = hasSteps ? ` (${task.steps.length}/${task.steps.length}步完成)` : '';
+              const notePart = task.statusNote ? ` — ${task.statusNote}` : '';
+              lines.push(`• *[${task.tag}]* ${task.title}${stepBadge}${notePart}`);
+            });
+          } else {
+            lines.push(`• （暫無）`);
+          }
+          lines.push('');
+        }
+      }
+
+      if (signoff) {
+        lines.push('---');
+        lines.push(signoff);
+      }
+
+      document.getElementById('wa-preview-box').value = lines.join('\n').trim();
+    }
+
+    function copyWhatsAppMessage() {
+      const textarea = document.getElementById('wa-preview-box');
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      try {
+        document.execCommand('copy');
+        showToast('已複製 WhatsApp 交接訊息！可直接貼上發送', 'success');
+      } catch (err) {
+        showToast('複製失敗，請手動全選文字複製', 'error');
+      }
+      window.getSelection().removeAllRanges();
+    }
+
+    // ==================== TEMPLATES MANAGER ====================
+    function addTplStepInputRow(text = '') {
+      const container = document.getElementById('tpl-steps-list');
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 tpl-step-row';
+      row.innerHTML = `
+        <span class="text-xs text-slate-400 font-mono">•</span>
+        <input type="text" value="${escapeHtml(text)}" placeholder="輸入預設步驟（例如：交老細簽批）"
+          class="tpl-step-input flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500" />
+        <button type="button" onclick="this.closest('.tpl-step-row').remove()" class="p-1 text-slate-400 hover:text-rose-600">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      `;
+      container.appendChild(row);
+      lucide.createIcons();
+    }
+
+    function handleSaveTemplate(e) {
+      e.preventDefault();
+      const editId = document.getElementById('edit-tpl-id').value;
+      const tag = document.getElementById('tpl-tag').value.trim() || 'General';
+      const title = document.getElementById('tpl-title').value.trim();
+      const handoverNote = document.getElementById('tpl-handover-note').value.trim();
+
+      const steps = [];
+      document.querySelectorAll('#tpl-steps-list .tpl-step-input').forEach(inp => {
+        if (inp.value.trim()) steps.push(inp.value.trim());
+      });
+
+      if (!title) return;
+
+      if (editId) {
+        const idx = templates.findIndex(t => t.id === editId);
+        if (idx !== -1) {
+          templates[idx] = { ...templates[idx], tag, title, steps, handoverNote };
+          showToast('已更新工作範本', 'success');
+        }
+      } else {
+        templates.unshift({
+          id: 'tpl-' + Date.now(),
+          tag,
+          title,
+          steps,
+          handoverNote
+        });
+        showToast('已建立新工作範本', 'success');
+      }
+
+      saveTemplatesToStorage();
+      resetTemplateForm();
+      renderTemplatesManager();
+      renderQuickTemplatesBar();
+    }
+
+    function resetTemplateForm() {
+      document.getElementById('edit-tpl-id').value = '';
+      document.getElementById('template-form').reset();
+      document.getElementById('tpl-steps-list').innerHTML = '';
+      addTplStepInputRow();
+      document.getElementById('tpl-form-heading').innerHTML = `<i data-lucide="folder-plus" class="w-4 h-4 text-indigo-600"></i><span>建立新工作範本</span>`;
+      document.getElementById('btn-cancel-tpl-edit').classList.add('hidden');
+      lucide.createIcons();
+    }
+
+    function editTemplate(tplId) {
+      const tpl = templates.find(t => t.id === tplId);
+      if (!tpl) return;
+
+      document.getElementById('edit-tpl-id').value = tpl.id;
+      document.getElementById('tpl-tag').value = tpl.tag;
+      document.getElementById('tpl-title').value = tpl.title;
+      document.getElementById('tpl-handover-note').value = tpl.handoverNote || '';
+
+      const list = document.getElementById('tpl-steps-list');
+      list.innerHTML = '';
+      if (tpl.steps && tpl.steps.length > 0) {
+        tpl.steps.forEach(s => addTplStepInputRow(s));
+      } else {
+        addTplStepInputRow();
+      }
+
+      document.getElementById('tpl-form-heading').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-amber-600"></i><span>編輯工作範本</span>`;
+      document.getElementById('btn-cancel-tpl-edit').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function deleteTemplate(tplId) {
+      openConfirmModal(
+        '刪除範本',
+        '確定要刪除此工作範本嗎？（不會影響已建立的工作紀錄）',
+        () => {
+          templates = templates.filter(t => t.id !== tplId);
+          saveTemplatesToStorage();
+          renderTemplatesManager();
+          renderQuickTemplatesBar();
+          showToast('已刪除範本', 'info');
+        }
+      );
+    }
+
+    function useTemplateNow(tplId) {
+      switchTab('today');
+      applyTemplateToForm(tplId);
+    }
+
+    function renderTemplatesManager() {
+      // Ensure at least 1 empty row in template form on initial view
+      if (document.querySelectorAll('#tpl-steps-list .tpl-step-row').length === 0) {
+        addTplStepInputRow();
+      }
+
+      const grid = document.getElementById('templates-grid');
+      if (templates.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-8 text-sm text-slate-400">尚未有任何範本，請於左方建立。</div>`;
+        return;
+      }
+
+      grid.innerHTML = templates.map(tpl => `
+        <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/50 flex flex-col justify-between hover:border-indigo-200 transition-colors">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <span class="inline-flex px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                ${escapeHtml(tpl.tag)}
+              </span>
+              <div class="flex items-center gap-1">
+                <button onclick="editTemplate('${tpl.id}')" class="p-1 text-slate-400 hover:text-amber-600 rounded-lg" title="編輯範本">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteTemplate('${tpl.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="刪除範本">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900 mt-2">${escapeHtml(tpl.title)}</h3>
+            ${tpl.steps && tpl.steps.length > 0 ? `
+              <ul class="mt-2.5 space-y-1 text-xs text-slate-600">
+                ${tpl.steps.map((s, i) => `
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-slate-400 font-mono">${i + 1}.</span>
+                    <span>${escapeHtml(s)}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            ` : `<p class="text-xs text-slate-400 mt-2 italic">（無預設步驟）</p>`}
+            ${tpl.handoverNote ? `
+              <p class="mt-2.5 text-xs text-amber-800 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200/50">
+                💡 ${escapeHtml(tpl.handoverNote)}
+              </p>
+            ` : ''}
+          </div>
+
+          <button onclick="useTemplateNow('${tpl.id}')" class="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white transition-all">
+            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            <span>立即套用至今日工作</span>
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // ==================== AUDIT LOG / HISTORY & EXPORT ====================
+    function populateHistoryTagFilter() {
+      const select = document.getElementById('history-tag-filter');
+      const allTags = [...new Set(tasks.map(t => t.tag))].sort();
+      select.innerHTML = `<option value="ALL">所有工作分類 (All Tags)</option>` +
+        allTags.map(tag => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join('');
+    }
+
+    function renderHistoryList() {
+      const keyword = document.getElementById('history-search').value.trim().toLowerCase();
+      const tagFilter = document.getElementById('history-tag-filter').value;
+      const statusFilter = document.getElementById('history-status-filter').value;
+
+      const filtered = tasks.filter(t => {
+        if (tagFilter !== 'ALL' && t.tag !== tagFilter) return false;
+        if (statusFilter === 'pending' && t.completed) return false;
+        if (statusFilter === 'completed' && !t.completed) return false;
+        if (keyword) {
+          const stepsText = (t.steps || []).map(s => s.text).join(' ');
+          const blob = `${t.title} ${t.tag} ${t.statusNote || ''} ${t.handoverNote || ''} ${stepsText}`.toLowerCase();
+          if (!blob.includes(keyword)) return false;
+        }
+        return true;
+      });
+
+      const container = document.getElementById('history-log-container');
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+            <p class="text-sm text-slate-500">找不到符合條件的歷史工作紀錄</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group by date descending
+      const grouped = {};
+      filtered.forEach(t => {
+        if (!grouped[t.date]) grouped[t.date] = [];
+        grouped[t.date].push(t);
+      });
+
+      const sortedDates = Object.keys(grouped).sort().reverse();
+
+      container.innerHTML = sortedDates.map(dateStr => {
+        const dayItems = grouped[dateStr];
+        const doneCount = dayItems.filter(i => i.completed).length;
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+            <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
+                <span class="text-sm font-bold text-slate-800">${formatDisplayDate(dateStr)}</span>
+                <span class="text-xs text-slate-500">(${doneCount}/${dayItems.length} 項已完成)</span>
+              </div>
+              <button onclick="jumpToDate('${dateStr}')" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1">
+                <span>前往該日編輯 / 生成交接訊息</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div class="divide-y divide-slate-100">
+              ${dayItems.map(item => `
+                <div class="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div class="space-y-1.5 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-xs font-semibold px-2 py-0.5 rounded-md ${item.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                        ${item.completed ? '✅ 已完成' : '⏳ 交接中'}
+                      </span>
+                      <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                        ${escapeHtml(item.tag)}
+                      </span>
+                      <span class="text-sm font-bold text-slate-900">${escapeHtml(item.title)}</span>
+                    </div>
+
+                    ${item.steps && item.steps.length > 0 ? `
+                      <div class="flex flex-wrap gap-1.5 pt-1">
+                        ${item.steps.map(s => `
+                          <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border ${s.done ? 'bg-emerald-50/70 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-600'}">
+                            ${s.done ? '☑' : '☐'} ${escapeHtml(s.text)}
+                          </span>
+                        `).join('')}
+                      </div>
+                    ` : ''}
+
+                    ${item.statusNote ? `<p class="text-xs text-slate-600">📝 情況：${escapeHtml(item.statusNote)}</p>` : ''}
+                    ${item.handoverNote ? `<p class="text-xs text-amber-800">💡 備註：${escapeHtml(item.handoverNote)}</p>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function jumpToDate(dateStr) {
+      document.getElementById('active-date').value = dateStr;
+      handleDateChange(dateStr);
+      switchTab('today');
+    }
+
+    // ==================== EXPORT & BACKUP FUNCTIONS ====================
+    function exportJSONBackup() {
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        app: 'HQ_Work_Handover_Log',
+        tasks,
+        templates
+      };
+      downloadFile(
+        JSON.stringify(backup, null, 2),
+        `HQ_WorkLog_Backup_${getTodayDateStr()}.json`,
+        'application/json'
+      );
+      showToast('已下載完整 JSON 備份檔', 'success');
+    }
+
+    function importJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data.tasks)) {
+            throw new Error('無效的備份檔案格式');
+          }
+          openConfirmModal(
+            '還原備份資料',
+            `確定要從備份檔還原 ${data.tasks.length} 筆工作紀錄及 ${(data.templates || []).length} 個範本嗎？這將會覆蓋目前瀏覽器內的資料。`,
+            () => {
+              tasks = data.tasks;
+              if (Array.isArray(data.templates)) {
+                templates = data.templates;
+              }
+              saveTasksToStorage();
+              saveTemplatesToStorage();
+              renderQuickTemplatesBar();
+              renderTasksForActiveDate();
+              renderTemplatesManager();
+              populateHistoryTagFilter();
+              renderHistoryList();
+              updateWhatsAppPreview();
+              showToast('備份資料已成功還原！', 'success');
+            }
+          );
+        } catch (err) {
+          showToast('還原失敗：檔案格式不正確', 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function exportMarkdown() {
+      if (tasks.length === 0) {
+        showToast('暫無紀錄可供匯出', 'error');
+        return;
+      }
+
+      const grouped = {};
+      tasks.forEach(t => {
+        if (!grouped[t.date]) grouped[t.date] = [];
+        grouped[t.date].push(t);
+      });
+
+      const sortedDates = Object.keys(grouped).sort().reverse();
+      let md = `# 總部工作紀錄及交接留底\n\n匯出時間：${new Date().toLocaleString('zh-HK')}\n\n---\n\n`;
+
+      sortedDates.forEach(dateStr => {
+        md += `## ${formatDisplayDate(dateStr)}\n\n`;
+        grouped[dateStr].forEach(item => {
+          const statusIcon = item.completed ? '✅' : '⏳';
+          md += `### ${statusIcon} [${item.tag}] ${item.title}\n`;
+          if (item.steps && item.steps.length > 0) {
+            item.steps.forEach(s => {
+              md += `- [${s.done ? 'x' : ' '}] ${s.text}\n`;
+            });
+          }
+          if (item.statusNote) md += `- **最新情況**：${item.statusNote}\n`;
+          if (item.handoverNote) md += `- **交接備註**：${item.handoverNote}\n`;
+          md += `\n`;
+        });
+      });
+
+      downloadFile(md, `HQ_WorkLog_Audit_${getTodayDateStr()}.md`, 'text/markdown;charset=utf-8');
+      showToast('已匯出 Markdown 留底檔案', 'success');
+    }
+
+    function exportCSV() {
+      if (tasks.length === 0) {
+        showToast('暫無紀錄可供匯出', 'error');
+        return;
+      }
+
+      const headers = ['日期', '狀態', '工作分類', '事項標題', '步驟進度明細', '最新情況', '交接備註'];
+      const sorted = [...tasks].sort((a, b) => b.date.localeCompare(a.date));
+
+      const rows = sorted.map(t => {
+        const stepsStr = (t.steps || []).map(s => `${s.done ? '[完成]' : '[未完]'} ${s.text}`).join(' ; ');
+        return [
+          t.date,
+          t.completed ? '已完成' : '跟進中/交接',
+          t.tag,
+          t.title,
+          stepsStr,
+          t.statusNote || '',
+          t.handoverNote || ''
+        ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      downloadFile(csvContent, `HQ_WorkLog_${getTodayDateStr()}.csv`, 'text/csv;charset=utf-8;');
+      showToast('已匯出 CSV 表格檔案', 'success');
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ==================== UTILITIES & UI HELPERS ====================
+    function formatDisplayDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      return `${dateStr} (${weekdays[d.getDay()]})`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let bgClass = 'bg-slate-800 text-white';
+      let iconName = 'info';
+      if (type === 'success') {
+        bgClass = 'bg-emerald-700 text-white';
+        iconName = 'check-circle';
+      } else if (type === 'error') {
+        bgClass = 'bg-rose-600 text-white';
+        iconName = 'alert-circle';
+      }
+
+      toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+      toast.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4 shrink-0"></i><span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function openConfirmModal(title, desc, onConfirm) {
+      document.getElementById('confirm-modal-title').textContent = title;
+      document.getElementById('confirm-modal-desc').textContent = desc;
+      confirmCallback = onConfirm;
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('confirm-modal-btn').onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      confirmCallback = null;
+    }
+  </script>
+</body>
+</html>
