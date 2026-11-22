@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cornell Obsidian Notes Studio</title>
+  <style>
+    :root {
+      --bg-app: #f7f8fa;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f1f3f6;
+      --bg-accent-soft: #eef2ff;
+      --bg-callout: #f0f7ff;
+      --border-callout: #3b82f6;
+      --text-main: #18181b;
+      --text-muted: #52525b;
+      --text-soft: #71717a;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --danger: #dc2626;
+      --link-obsidian: #6d28d9;
+      --link-obsidian-bg: #f3e8ff;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.05);
+      --shadow-md: 0 6px 20px rgba(24, 24, 27, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "Noto Sans HK", Roboto, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    button:hover {
+      background: var(--bg-subtle);
+      border-color: var(--border-strong);
+    }
+
+    button.btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    button.btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    button.btn-success {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    button.btn-danger-ghost {
+      color: var(--danger);
+      border-color: transparent;
+      background: transparent;
+    }
+
+    button.btn-danger-ghost:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    button.btn-sm {
+      padding: 5px 9px;
+      font-size: 0.8rem;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 84px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 56px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 0.96rem;
+      white-space: nowrap;
+    }
+
+    .save-pill {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid #a7f3d0;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) minmax(340px, 430px);
+      min-height: calc(100vh - 56px);
+      align-items: start;
+    }
+
+    .workspace.sidebar-collapsed {
+      grid-template-columns: 0px minmax(0, 1fr) minmax(340px, 430px);
+    }
+
+    .workspace.preview-collapsed {
+      grid-template-columns: 260px minmax(0, 1fr) 0px;
+    }
+
+    .workspace.sidebar-collapsed.preview-collapsed {
+      grid-template-columns: 0px minmax(0, 1fr) 0px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--bg-surface);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-inner {
+      width: 260px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: calc(100vh - 56px);
+    }
+
+    .note-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .note-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 10px;
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .note-item:hover {
+      background: var(--bg-subtle);
+    }
+
+    .note-item.active {
+      border-color: var(--primary);
+      background: var(--bg-accent-soft);
+    }
+
+    .note-item-title {
+      font-size: 0.86rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+
+    .note-item-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge.exported {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    /* Center Editor */
+    .editor-pane {
+      padding: 14px 16px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--bg-subtle);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .type-switch {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 2px;
+    }
+
+    .type-switch button {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .type-switch button.active {
+      background: var(--bg-surface);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sub-switch-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--bg-subtle);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .chip.wiki {
+      background: var(--link-obsidian-bg);
+      color: var(--link-obsidian);
+      border-color: #ddd6fe;
+    }
+
+    .chip button {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1;
+      color: var(--text-soft);
+    }
+
+    /* Cornell Section Blocks */
+    .cornell-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background: #fcfcfd;
+      margin-bottom: 12px;
+    }
+
+    .cornell-block-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .cornell-cols {
+      display: grid;
+      grid-template-columns: 36% 64%;
+      gap: 10px;
+    }
+
+    .cornell-cue-box {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      border: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .cornell-note-box {
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      border: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .box-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .note-mode-toggle {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .note-mode-toggle button {
+      padding: 2px 7px;
+      font-size: 0.72rem;
+    }
+
+    .note-mode-toggle button.active {
+      background: var(--bg-accent-soft);
+      color: var(--primary);
+      border-color: #c7d2fe;
+      font-weight: 600;
+    }
+
+    /* List Items */
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .list-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Right Preview Pane */
+    .preview-pane {
+      border-left: 1px solid var(--border);
+      background: var(--bg-surface);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-inner {
+      width: 100%;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .raw-md-box {
+      width: 100%;
+      min-height: 420px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    /* Simulated Obsidian Rendered View */
+    .obsidian-rendered {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: #ffffff;
+      font-size: 0.88rem;
+    }
+
+    .obs-props {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 0.78rem;
+    }
+
+    .obs-prop-row {
+      display: grid;
+      grid-template-columns: 105px minmax(0, 1fr);
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .obs-prop-row:last-child {
+      border-bottom: none;
+    }
+
+    .obs-prop-key {
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .obs-h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .obs-h2 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin: 14px 0 8px;
+    }
+
+    .obs-h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 10px 0 6px;
+      color: var(--primary);
+    }
+
+    .obs-callout {
+      background: var(--bg-callout);
+      border-left: 4px solid var(--border-callout);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 0.84rem;
+    }
+
+    .obs-callout-title {
+      font-weight: 700;
+      color: #1d4ed8;
+      margin-bottom: 3px;
+    }
+
+    .obs-quote {
+      border-left: 3px solid var(--border-strong);
+      padding: 4px 0 4px 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin: 6px 0;
+    }
+
+    .obs-wikilink {
+      color: var(--link-obsidian);
+      background: var(--link-obsidian-bg);
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .obs-task {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      margin: 5px 0;
+      font-size: 0.86rem;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 680px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #18181b;
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      z-index: 80;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .workspace,
+      .workspace.sidebar-collapsed,
+      .workspace.preview-collapsed,
+      .workspace.sidebar-collapsed.preview-collapsed {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sidebar {
+        display: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .workspace:not(.sidebar-collapsed) .sidebar {
+        display: block;
+      }
+
+      .sidebar-inner {
+        width: 100%;
+        max-height: 250px;
+      }
+
+      .preview-pane {
+        display: none;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .workspace:not(.preview-collapsed) .preview-pane {
+        display: block;
+      }
+
+      .preview-inner {
+        max-height: none;
+      }
+
+      .cornell-cols,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .brand-title {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="toggleSidebarBtn" class="btn-sm" title="切換筆記列表">☰ 列表</button>
+      <div class="brand-title">Cornell Obsidian Notes</div>
+      <span id="saveStatusPill" class="save-pill">已自動儲存</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="togglePreviewBtn" class="btn-sm">👁️ 預覽</button>
+      <button id="openTemplateBtn" class="btn-sm">⚙️ 模板</button>
+      <button id="openBackupBtn" class="btn-sm">💾 備份</button>
+      <button id="copyMdBtn" class="btn-sm btn-primary">📋 Copy MD</button>
+      <button id="downloadMdBtn" class="btn-sm btn-success">⬇️ .md</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main id="workspace" class="workspace sidebar-collapsed preview-collapsed">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input id="searchNotesInput" type="text" placeholder="搜尋標題、作者、平台..." />
+          <button id="newNoteBtn" class="btn-primary btn-sm" title="新增筆記">＋ 新增</button>
+        </div>
+        <div id="noteList" class="note-list"></div>
+      </div>
+    </aside>
+
+    <!-- Center Editor -->
+    <section class="editor-pane">
+      <!-- 1. Basic Metadata -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">1. 資料來源</div>
+          <div class="type-switch" role="group" aria-label="資料類型">
+            <button id="typeBookBtn" type="button">📚 書本</button>
+            <button id="typeVideoBtn" type="button">🎬 長片 / 課程</button>
+            <button id="typeSocialBtn" type="button">📱 帖文 / 短片</button>
+          </div>
+        </div>
+
+        <!-- Sub-switch for Social Post vs Short Video -->
+        <div id="socialFormatBar" class="sub-switch-bar" style="display:none;">
+          <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">內容形式：</span>
+          <div class="type-switch" style="background:#fff;">
+            <button id="socialTextBtn" type="button">📝 文字帖文</button>
+            <button id="socialShortBtn" type="button">🎞️ 短片 (Reels / Shorts)</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label id="titleLabel" for="metaTitle">書本標題</label>
+            <input id="metaTitle" type="text" placeholder="輸入書名、單元或帖文主題（帖文留空可自動命名）..." />
+          </div>
+          <div class="field">
+            <label id="creatorLabel" for="metaCreator">作者</label>
+            <input id="metaCreator" type="text" placeholder="輸入作者、講師、頻道或 @帳號..." />
+          </div>
+        </div>
+
+        <div id="courseFieldWrap" class="field" style="display:none;">
+          <label for="metaCourse">課程系列 / 平台（選填，例如 Master the Score、Udemy）</label>
+          <input id="metaCourse" type="text" placeholder="例如：Master the Score - Orchestration / Udemy 某課程..." />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="metaUrl">來源連結 / 網址（YouTube / Shorts 可自動抓標題）</label>
+            <div style="display:flex; gap:6px;">
+              <input id="metaUrl" type="url" placeholder="https://..." />
+              <button id="fetchYtBtn" type="button" class="btn-sm" title="抓取 YouTube 標題與頻道">抓取</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="metaPlatform">來源平台</label>
+            <input id="metaPlatform" type="text" placeholder="自動辨識（Threads / Instagram / YouTube / Udemy...）" />
+          </div>
+        </div>
+
+        <!-- Date Fields: Range for Book/Course, Single for Social -->
+        <div id="rangeDateRow" class="grid-2">
+          <div class="field">
+            <label for="metaStartDate">開始日期</label>
+            <input id="metaStartDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="metaEndDate">結束日期（進行中可留空）</label>
+            <input id="metaEndDate" type="date" />
+          </div>
+        </div>
+
+        <div id="singleDateRow" class="field" style="display:none;">
+          <label for="metaSingleDate">閱讀 / 發文日期</label>
+          <input id="metaSingleDate" type="date" />
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="tagInput">標籤 Tags（按 Enter 新增）</label>
+            <input id="tagInput" type="text" placeholder="輸入 Tag 後按 Enter，例如：music-theory" />
+            <div id="tagChips" class="chip-row"></div>
+          </div>
+          <div class="field">
+            <label for="relatedInput">串連舊筆記 Related Notes（按 Enter 自動轉 [[雙向連結]]）</label>
+            <input id="relatedInput" type="text" placeholder="輸入筆記名稱後按 Enter，例如：對位法基礎" />
+            <div id="relatedChips" class="chip-row"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Cornell Outline -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">2. 內容大綱（Cornell 雙欄 + 隨思）</div>
+          <button id="addSectionBtn" type="button" class="btn-primary btn-sm">＋ 新增段落</button>
+        </div>
+
+        <div id="cornellSections"></div>
+
+        <div class="field" style="margin-top:12px; margin-bottom:0;">
+          <label for="summaryInput">📌 本篇總結（Summary — 建議 2–3 句概括核心）</label>
+          <textarea id="summaryInput" rows="3" placeholder="用自己嘅話總結呢份內容講乜..."></textarea>
+        </div>
+      </div>
+
+      <!-- 3. Further Questions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">3. 延伸問題（Further Questions）</div>
+          <button id="addQuestionBtn" type="button" class="btn-sm">＋ 新增問題</button>
+        </div>
+        <div id="questionsList"></div>
+      </div>
+
+      <!-- 4. Action & Re-watch Value -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">4. Action 與重睇價值</div>
+        </div>
+
+        <div class="field">
+          <label for="revisitRating">值得重睇 / 重讀程度</label>
+          <select id="revisitRating">
+            <option value="⭐⭐⭐⭐⭐ 必重溫 (Evergreen)">⭐⭐⭐⭐⭐ 必重溫 (Evergreen)</option>
+            <option value="⭐⭐⭐⭐ 高價值，值得再睇">⭐⭐⭐⭐ 高價值，值得再睇</option>
+            <option value="⭐⭐⭐ 作參考翻查 (Reference)">⭐⭐⭐ 作參考翻查 (Reference)</option>
+            <option value="⭐⭐ 一般，有需要再睇">⭐⭐ 一般，有需要再睇</option>
+            <option value="⭐ 睇過就算 (One-off)">⭐ 睇過就算 (One-off)</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+            <label style="margin:0;">具體行動清單（Action Items）</label>
+            <button id="addActionBtn" type="button" class="btn-sm">＋ 新增 Action</button>
+          </div>
+          <div id="actionsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Preview Pane -->
+    <aside class="preview-pane">
+      <div class="preview-inner">
+        <div class="preview-toolbar">
+          <div class="card-title">Obsidian 筆記預覽</div>
+          <div class="type-switch">
+            <button id="viewRenderedBtn" type="button" class="active">👁️ 渲染預覽</button>
+            <button id="viewRawBtn" type="button">📝 Markdown</button>
+          </div>
+        </div>
+
+        <div id="renderedPreview" class="obsidian-rendered"></div>
+        <textarea id="rawMarkdownPreview" class="raw-md-box" style="display:none;" readonly></textarea>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Template Settings Modal -->
+  <div id="templateModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:1.05rem;">⚙️ Obsidian Template 設定</h3>
+        <button id="closeTemplateBtn" class="btn-sm">✕</button>
+      </div>
+
+      <div class="field">
+        <label>快速套用預設 Preset</label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-sm" id="presetBookBtn">📚 閱讀筆記 Preset</button>
+          <button type="button" class="btn-sm" id="presetCourseBtn">🎓 線上課程 Preset</button>
+          <button type="button" class="btn-sm" id="presetSocialBtn">📱 帖文 / 短片 Preset</button>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>YAML 開始日期欄位名</label>
+          <input id="tplStartDateKey" type="text" />
+        </div>
+        <div class="field">
+          <label>YAML 結束日期欄位名</label>
+          <input id="tplEndDateKey" type="text" />
+        </div>
+        <div class="field">
+          <label>YAML 重睇評價欄位名</label>
+          <input id="tplRatingKey" type="text" />
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>書本預設 Tags</label>
+          <input id="tplBookTags" type="text" />
+        </div>
+        <div class="field">
+          <label>長片 / 課程預設 Tags</label>
+          <input id="tplVideoTags" type="text" />
+        </div>
+        <div class="field">
+          <label>帖文 / 短片預設 Tags</label>
+          <input id="tplSocialTags" type="text" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Cornell「線索與隨思」匯出格式</label>
+        <select id="tplCueStyle">
+          <option value="callout">Callout 框（&gt; [!tip] 線索與隨思）</option>
+          <option value="list">引用清單（- **線索與隨思**：...）</option>
+          <option value="table">Cornell 雙欄 Markdown 表格</option>
+        </select>
+      </div>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>大綱章節標題</label>
+          <input id="tplOutlineHeading" type="text" />
+        </div>
+        <div class="field">
+          <label>延伸問題標題</label>
+          <input id="tplQuestionsHeading" type="text" />
+        </div>
+        <div class="field">
+          <label>Action 標題</label>
+          <input id="tplActionsHeading" type="text" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="saveTemplateBtn" class="btn-primary">儲存 Template 設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JSON Backup Modal -->
+  <div id="backupModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:1.05rem;">💾 JSON Backup 與還原</h3>
+        <button id="closeBackupBtn" class="btn-sm">✕</button>
+      </div>
+
+      <p id="backupStatsText" style="font-size:0.86rem; color:var(--text-muted); margin-top:0;"></p>
+
+      <div class="card" style="box-shadow:none; background:var(--bg-subtle); margin-bottom:14px;">
+        <div style="font-weight:700; margin-bottom:6px;">匯出完整備份（所有筆記 + Template 設定）</div>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin:0 0 10px;">
+          下載包含全部草稿、已匯出狀態與自訂 Template 設定嘅 <code>.json</code> 檔案。
+        </p>
+        <button id="exportJsonBtn" class="btn-primary btn-sm">⬇️ 下載 JSON 備份檔</button>
+      </div>
+
+      <div class="card" style="box-shadow:none; background:var(--bg-subtle);">
+        <div style="font-weight:700; margin-bottom:6px;">匯入 JSON 備份檔</div>
+        <div class="field">
+          <label>匯入模式</label>
+          <select id="importModeSelect">
+            <option value="merge">合併匯入（按 ID 新增或更新，保留現有其他筆記）</option>
+            <option value="replace">完全覆蓋（以備份檔內容取代目前所有筆記與設定）</option>
+          </select>
+        </div>
+        <input id="importJsonFileInput" type="file" accept=".json,application/json" />
+      </div>
+
+      <div class="modal-footer">
+        <button id="doneBackupBtn" class="btn-sm">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "cornell_obsidian_studio_v1";
+
+    function todayStr() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function uid() {
+      return "n_" + Math.random().toString(36).slice(2, 9) + "_" + Date.now().toString(36);
+    }
+
+    function createDefaultTemplate() {
+      return {
+        startDateKey: "start_date",
+        endDateKey: "end_date",
+        ratingKey: "revisit_value",
+        bookTags: ["book"],
+        videoTags: ["course-video"],
+        socialTags: ["social-clipping"],
+        cueStyle: "callout",
+        outlineHeading: "📝 內容大綱 (Cornell Notes)",
+        questionsHeading: "❓ 延伸問題",
+        actionsHeading: "🚀 Action Items"
+      };
+    }
+
+    function createEmptyNote(type = "book") {
+      return {
+        id: uid(),
+        type, // "book" | "video" | "social"
+        socialFormat: "post", // "post" | "short"
+        title: "",
+        creator: "",
+        course: "",
+        url: "",
+        platform: type === "book" ? "Book" : "",
+        startDate: todayStr(),
+        endDate: "",
+        tags: [],
+        relatedNotes: [],
+        sections: [
+          {
+            id: uid(),
+            heading: "段落 1",
+            cue: "",
+            note: "",
+            noteMode: type === "social" ? "quote" : "note",
+            timestamp: ""
+          }
+        ],
+        summary: "",
+        questions: [{ id: uid(), text: "", done: false }],
+        revisitRating: "⭐⭐⭐⭐ 高價值，值得再睇",
+        actions: [{ id: uid(), text: "", done: false }],
+        exportedMd: false,
+        updatedAt: Date.now()
+      };
+    }
+
+    function createSampleNote() {
+      const n = createEmptyNote("video");
+      n.title = "Orchestration & Counterpoint Lesson";
+      n.creator = "課程導師";
+      n.course = "Master the Score";
+      n.url = "https://masterthescore.com/example-lesson";
+      n.platform = "Master the Score";
+      n.startDate = todayStr();
+      n.endDate = "";
+      n.tags = ["music", "orchestration", "master-the-score"];
+      n.relatedNotes = ["聲部平衡筆記", "配器法總結"];
+      n.sections = [
+        {
+          id: uid(),
+          heading: "木管與銅管聲部交接",
+          cue: "隨思：呢個聲部疊加方法可以試下用喺抒情副歌過渡位，留意唔好搶主旋律中頻。",
+          note: "中低音區保持乾淨，木管負責靈活旋律線，銅管只喺高潮位點綴。",
+          noteMode: "note",
+          timestamp: "06:45"
+        },
+        {
+          id: uid(),
+          heading: "關鍵概念摘錄",
+          cue: "關鍵字：Texture / Clarity",
+          note: "Arrangement is not about filling every frequency, it is about giving each voice room to breathe.",
+          noteMode: "quote",
+          timestamp: "12:10"
+        }
+      ];
+      n.summary = "透過分層安排木管與銅管職責，喺保持編曲厚重感同時保留清晰度。";
+      n.questions = [
+        { id: uid(), text: "弦樂 pizzicato 同木管齊奏時，點樣調整 panning 最自然？ [[弦樂編曲]]", done: false }
+      ];
+      n.actions = [
+        { id: uid(), text: "開返目前個 DAW project，測試減去一層重複和聲軌。", done: false }
+      ];
+      return n;
+    }
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.notes) && parsed.notes.length > 0) {
+            return {
+              notes: parsed.notes.map(normalizeNote),
+              activeNoteId: parsed.activeNoteId || parsed.notes[0].id,
+              template: { ...createDefaultTemplate(), ...(parsed.template || {}) },
+              lastBackupAt: parsed.lastBackupAt || null
+            };
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load localStorage:", e);
+      }
+      const sample = createSampleNote();
+      return {
+        notes: [sample],
+        activeNoteId: sample.id,
+        template: createDefaultTemplate(),
+        lastBackupAt: null
+      };
+    }
+
+    function normalizeNote(n) {
+      const base = createEmptyNote(n.type || "book");
+      return {
+        ...base,
+        ...n,
+        socialFormat: n.socialFormat || "post",
+        startDate: n.startDate || n.date || todayStr(),
+        endDate: n.endDate || "",
+        tags: Array.isArray(n.tags) ? n.tags : [],
+        relatedNotes: Array.isArray(n.relatedNotes) ? n.relatedNotes : [],
+        sections: Array.isArray(n.sections) && n.sections.length > 0 ? n.sections : base.sections,
+        questions: Array.isArray(n.questions) ? n.questions : base.questions,
+        actions: Array.isArray(n.actions) ? n.actions : base.actions
+      };
+    }
+
+    function persistState(label = "已自動儲存") {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const pill = document.getElementById("saveStatusPill");
+        if (pill) pill.textContent = label;
+      } catch (e) {
+        showToast("儲存空間已滿或受限，建議匯出 JSON 備份");
+      }
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    function getActiveNote() {
+      return state.notes.find(n => n.id === state.activeNoteId) || state.notes[0];
+    }
+
+    function getDisplayTitle(note) {
+      if (note.title && note.title.trim()) return note.title.trim();
+      if (note.type === "social") {
+        const who = note.creator ? note.creator.trim() : "社交平台";
+        const plat = note.platform ? ` - ${note.platform}` : "";
+        const dt = note.startDate ? ` (${note.startDate})` : "";
+        return `${who}${plat}${dt}`;
+      }
+      return "未命名筆記";
+    }
+
+    function detectPlatformFromUrl(urlStr, type) {
+      if (!urlStr) return type === "book" ? "Book" : "";
+      try {
+        const u = new URL(urlStr.startsWith("http") ? urlStr : "https://" + urlStr);
+        const host = u.hostname.toLowerCase();
+        const path = u.pathname.toLowerCase();
+        if (host.includes("threads.net") || host.includes("threads.com")) return "Threads";
+        if (host.includes("instagram.com")) return path.includes("/reel") ? "Instagram Reels" : "Instagram";
+        if (host.includes("tiktok.com")) return "TikTok";
+        if (host.includes("twitter.com") || host.includes("x.com")) return "X (Twitter)";
+        if (host.includes("reddit.com")) return "Reddit";
+        if (host.includes("facebook.com") || host.includes("fb.watch")) return "Facebook";
+        if (host.includes("youtube.com") || host.includes("youtu.be")) {
+          return path.includes("/shorts/") ? "YouTube Shorts" : "YouTube";
+        }
+        if (host.includes("udemy.com")) return "Udemy";
+        if (host.includes("masterthescore.com")) return "Master the Score";
+        if (host.includes("coursera.org")) return "Coursera";
+        if (host.includes("skillshare.com")) return "Skillshare";
+        return host.replace(/^www\./, "");
+      } catch {
+        return "";
+      }
+    }
+
+    function parseTimestampInput(raw) {
+      if (!raw) return null;
+      const clean = raw.trim().replace(/^@/, "");
+      let mins = 0;
+      let secs = 0;
+      if (clean.includes(":")) {
+        const parts = clean.split(":").map(Number);
+        if (parts.length === 2 && !parts.some(isNaN)) {
+          mins = parts[0];
+          secs = parts[1];
+        } else if (parts.length === 3 && !parts.some(isNaN)) {
+          mins = parts[0] * 60 + parts[1];
+          secs = parts[2];
+        } else {
+          return null;
+        }
+      } else if (/^\d{3,4}$/.test(clean)) {
+        mins = parseInt(clean.slice(0, -2), 10);
+        secs = parseInt(clean.slice(-2), 10);
+      } else {
+        return null;
+      }
+      const totalSeconds = mins * 60 + secs;
+      const formatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      return { formatted, totalSeconds };
+    }
+
+    function formatTimestampMarkdown(tsStr, urlStr, note) {
+      if (note.type === "book") return "";
+      if (note.type === "social" && note.socialFormat === "post") return "";
+      const parsed = parseTimestampInput(tsStr);
+      if (!parsed) return tsStr ? `\`[${tsStr}]\`` : "";
+      const platform = detectPlatformFromUrl(urlStr, note.type);
+      if ((platform === "YouTube" || platform === "YouTube Shorts") && urlStr) {
+        const sep = urlStr.includes("?") ? "&" : "?";
+        return `[${parsed.formatted}](${urlStr}${sep}t=${parsed.totalSeconds}s)`;
+      }
+      return `\`[${parsed.formatted}]\``;
+    }
+
+    async function fetchYouTubeMeta(urlStr) {
+      if (!urlStr) return;
+      try {
+        const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(urlStr)}&format=json`;
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error("oEmbed error");
+        const data = await res.json();
+        const note = getActiveNote();
+        if (data.title && !note.title) note.title = data.title;
+        if (data.author_name && !note.creator) note.creator = data.author_name;
+        const isShorts = urlStr.toLowerCase().includes("/shorts/");
+        note.platform = isShorts ? "YouTube Shorts" : "YouTube";
+        if (isShorts && note.type === "social") note.socialFormat = "short";
+        note.updatedAt = Date.now();
+        persistState();
+        renderAll();
+        showToast("已自動填入 YouTube 標題與頻道");
+      } catch {
+        showToast("未能自動抓取（非 YouTube 公開連結），可手動輸入");
+      }
+    }
+
+    function buildMarkdown(note, tpl) {
+      const defaultTypeTags =
+        note.type === "book"
+          ? tpl.bookTags
+          : note.type === "social"
+            ? (tpl.socialTags || ["social-clipping"])
+            : tpl.videoTags;
+
+      const combinedTags = Array.from(new Set([
+        ...defaultTypeTags,
+        ...(note.type === "social" && note.socialFormat === "short" ? ["short-video"] : []),
+        ...note.tags
+      ])).filter(Boolean);
+
+      const resolvedTitle = getDisplayTitle(note);
+      const effectiveType = note.type === "social"
+        ? (note.socialFormat === "short" ? "short-video" : "social-post")
+        : note.type;
+
+      const yamlLines = [
+        "---",
+        `type: ${effectiveType}`,
+        `title: "${resolvedTitle.replace(/"/g, '\\"')}"`,
+        `${note.type === "book" ? "author" : "creator"}: "${(note.creator || "").replace(/"/g, '\\"')}"`
+      ];
+
+      if (note.type === "video" && note.course) {
+        yamlLines.push(`course: "${note.course.replace(/"/g, '\\"')}"`);
+      }
+      if (note.platform) {
+        yamlLines.push(`platform: "${note.platform.replace(/"/g, '\\"')}"`);
+      }
+      if (note.url) {
+        yamlLines.push(`url: "${note.url.replace(/"/g, '\\"')}"`);
+      }
+
+      if (note.type === "social") {
+        yamlLines.push(`date: ${note.startDate || ""}`);
+      } else {
+        yamlLines.push(`${tpl.startDateKey || "start_date"}: ${note.startDate || ""}`);
+        yamlLines.push(`${tpl.endDateKey || "end_date"}: ${note.endDate || ""}`);
+      }
+
+      yamlLines.push(`${tpl.ratingKey || "revisit_value"}: "${note.revisitRating.replace(/"/g, '\\"')}"`);
+      if (combinedTags.length > 0) {
+        yamlLines.push(`tags: [${combinedTags.join(", ")}]`);
+      }
+      if (note.relatedNotes.length > 0) {
+        yamlLines.push(`related: [${note.relatedNotes.map(r => `"[[${r}]]"`).join(", ")}]`);
+      }
+      yamlLines.push("---");
+
+      const parts = [
+        yamlLines.join("\n"),
+        "",
+        `# ${resolvedTitle}`
+      ];
+
+      if (note.relatedNotes.length > 0) {
+        parts.push("", `**關聯筆記**：${note.relatedNotes.map(r => `[[${r}]]`).join(" · ")}`);
+      }
+
+      parts.push("", `## ${tpl.outlineHeading}`);
+
+      note.sections.forEach((sec, idx) => {
+        const headingText = sec.heading || `段落 ${idx + 1}`;
+        const tsMd = formatTimestampMarkdown(sec.timestamp, note.url, note);
+        const noteBody = sec.noteMode === "quote"
+          ? `> ${(sec.note || "").replace(/\n/g, "\n> ")}`
+          : (sec.note || "");
+
+        parts.push("", `### ${idx + 1}. ${headingText}`);
+        if (tsMd) {
+          parts.push(`- **時間戳記**：${tsMd}`);
+        }
+        if (sec.note) {
+          parts.push(sec.noteMode === "quote" ? `- **原文摘錄**：\n${noteBody}` : `- **筆記重點**：${noteBody}`);
+        }
+
+        if (sec.cue) {
+          if (tpl.cueStyle === "list") {
+            parts.push(`- **線索與隨思**：${sec.cue}`);
+          } else if (tpl.cueStyle === "table") {
+            parts.push("", `| 線索與隨思 | 主筆記 |`, `| --- | --- |`, `| ${sec.cue.replace(/\|/g, "\\|").replace(/\n/g, "<br>")} | ${noteBody.replace(/\|/g, "\\|").replace(/\n/g, "<br>")} |`);
+          } else {
+            parts.push(`> [!tip] 線索與隨思`, `> ${sec.cue.replace(/\n/g, "\n> ")}`);
+          }
+        }
+      });
+
+      if (note.summary) {
+        parts.push("", `### 📌 總結 (Summary)`, note.summary);
+      }
+
+      const validQuestions = note.questions.filter(q => q.text.trim());
+      if (validQuestions.length > 0) {
+        parts.push("", `## ${tpl.questionsHeading}`);
+        validQuestions.forEach(q => {
+          parts.push(`- [${q.done ? "x" : " "}] ${q.text.trim()}`);
+        });
+      }
+
+      const validActions = note.actions.filter(a => a.text.trim());
+      if (validActions.length > 0) {
+        parts.push("", `## ${tpl.actionsHeading}`);
+        validActions.forEach(a => {
+          parts.push(`- [${a.done ? "x" : " "}] ${a.text.trim()}`);
+        });
+      }
+
+      return parts.join("\n");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function formatInlineObsidian(text) {
+      let html = escapeHtml(text);
+      html = html.replace(/\[\[([^\]]+)\]\]/g, `<span class="obs-wikilink">[[$1]]</span>`);
+      html = html.replace(/\n/g, "<br>");
+      return html;
+    }
+
+    function renderObsidianPreview(note, tpl) {
+      const rawBox = document.getElementById("rawMarkdownPreview");
+      const renderedBox = document.getElementById("renderedPreview");
+      const mdText = buildMarkdown(note, tpl);
+      rawBox.value = mdText;
+
+      const defaultTypeTags =
+        note.type === "book"
+          ? tpl.bookTags
+          : note.type === "social"
+            ? (tpl.socialTags || ["social-clipping"])
+            : tpl.videoTags;
+
+      const combinedTags = Array.from(new Set([
+        ...defaultTypeTags,
+        ...(note.type === "social" && note.socialFormat === "short" ? ["short-video"] : []),
+        ...note.tags
+      ])).filter(Boolean);
+
+      const resolvedTitle = getDisplayTitle(note);
+      const effectiveType = note.type === "social"
+        ? (note.socialFormat === "short" ? "short-video" : "social-post")
+        : note.type;
+
+      const propRows = [
+        ["type", effectiveType],
+        [note.type === "book" ? "author" : "creator", note.creator || "—"],
+        ...(note.type === "video" && note.course ? [["course", note.course]] : []),
+        ...(note.platform ? [["platform", note.platform]] : []),
+        ...(note.type === "social"
+          ? [["date", note.startDate || "—"]]
+          : [
+              [tpl.startDateKey || "start_date", note.startDate || "—"],
+              [tpl.endDateKey || "end_date", note.endDate || "進行中"]
+            ]),
+        [tpl.ratingKey || "revisit_value", note.revisitRating],
+        ["tags", combinedTags.length ? combinedTags.map(t => `#${t}`).join(" ") : "—"]
+      ];
+
+      const propsHtml = propRows
+        .map(([k, v]) => `<div class="obs-prop-row"><div class="obs-prop-key">${escapeHtml(k)}</div><div>${escapeHtml(v)}</div></div>`)
+        .join("");
+
+      const showTimestamp = note.type === "video" || (note.type === "social" && note.socialFormat === "short");
+
+      const sectionsHtml = note.sections.map((sec, idx) => {
+        const tsParsed = showTimestamp ? parseTimestampInput(sec.timestamp) : null;
+        const tsBadge = tsParsed
+          ? `<span class="badge" style="margin-left:6px;">⏱ ${tsParsed.formatted}</span>`
+          : "";
+        const noteHtml = sec.noteMode === "quote"
+          ? `<div class="obs-quote">${formatInlineObsidian(sec.note)}</div>`
+          : `<div>${formatInlineObsidian(sec.note)}</div>`;
+
+        const cueHtml = sec.cue
+          ? `<div class="obs-callout"><div class="obs-callout-title">💡 線索與隨思</div><div>${formatInlineObsidian(sec.cue)}</div></div>`
+          : "";
+
+        return `
+          <div class="obs-h3">${idx + 1}. ${escapeHtml(sec.heading || `段落 ${idx + 1}`)}${tsBadge}</div>
+          ${noteHtml}
+          ${cueHtml}
+        `;
+      }).join("");
+
+      const qHtml = note.questions
+        .filter(q => q.text.trim())
+        .map(q => `<div class="obs-task"><span>${q.done ? "☑" : "☐"}</span><span>${formatInlineObsidian(q.text)}</span></div>`)
+        .join("");
+
+      const aHtml = note.actions
+        .filter(a => a.text.trim())
+        .map(a => `<div class="obs-task"><span>${a.done ? "☑" : "☐"}</span><span>${formatInlineObsidian(a.text)}</span></div>`)
+        .join("");
+
+      renderedBox.innerHTML = `
+        <div class="obs-props">${propsHtml}</div>
+        <h1 class="obs-h1">${escapeHtml(resolvedTitle)}</h1>
+        ${note.relatedNotes.length ? `<div style="margin-bottom:10px; font-size:0.82rem;">關聯：${note.relatedNotes.map(r => `<span class="obs-wikilink">[[${escapeHtml(r)}]]</span>`).join(" ")}</div>` : ""}
+        <div class="obs-h2">${escapeHtml(tpl.outlineHeading)}</div>
+        ${sectionsHtml}
+        ${note.summary ? `<div class="obs-h3">📌 總結 (Summary)</div><div class="obs-callout" style="border-left-color:#10b981; background:#ecfdf5;">${formatInlineObsidian(note.summary)}</div>` : ""}
+        ${qHtml ? `<div class="obs-h2">${escapeHtml(tpl.questionsHeading)}</div>${qHtml}` : ""}
+        ${aHtml ? `<div class="obs-h2">${escapeHtml(tpl.actionsHeading)}</div>${aHtml}` : ""}
+      `;
+    }
+
+    function renderSidebar() {
+      const q = (document.getElementById("searchNotesInput").value || "").trim().toLowerCase();
+      const listEl = document.getElementById("noteList");
+      const filtered = state.notes.filter(n => {
+        if (!q) return true;
+        return [getDisplayTitle(n), n.creator, n.course, n.platform].some(v => (v || "").toLowerCase().includes(q));
+      });
+
+      listEl.innerHTML = filtered.map(n => {
+        const active = n.id === state.activeNoteId ? "active" : "";
+        const icon = n.type === "book" ? "📚" : (n.type === "social" ? (n.socialFormat === "short" ? "🎞️" : "📱") : "🎬");
+        const statusBadge = n.exportedMd
+          ? `<span class="badge exported">已匯出</span>`
+          : `<span class="badge">草稿</span>`;
+        return `
+          <div class="note-item ${active}" data-id="${n.id}">
+            <div class="note-item-title">${icon} ${escapeHtml(getDisplayTitle(n))}</div>
+            <div class="note-item-meta">
+              <span>${escapeHtml(n.startDate || "")}</span>
+              ${statusBadge}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      listEl.querySelectorAll(".note-item").forEach(item => {
+        item.addEventListener("click", () => {
+          state.activeNoteId = item.dataset.id;
+          persistState();
+          renderAll();
+        });
+      });
+    }
+
+    function renderEditor() {
+      const note = getActiveNote();
+      const isBook = note.type === "book";
+      const isVideo = note.type === "video";
+      const isSocial = note.type === "social";
+
+      document.getElementById("typeBookBtn").classList.toggle("active", isBook);
+      document.getElementById("typeVideoBtn").classList.toggle("active", isVideo);
+      document.getElementById("typeSocialBtn").classList.toggle("active", isSocial);
+
+      document.getElementById("socialFormatBar").style.display = isSocial ? "flex" : "none";
+      document.getElementById("socialTextBtn").classList.toggle("active", note.socialFormat === "post");
+      document.getElementById("socialShortBtn").classList.toggle("active", note.socialFormat === "short");
+
+      document.getElementById("titleLabel").textContent = isBook
+        ? "書本標題"
+        : isSocial
+          ? "帖文 / 短片主題（留空自動以帳號+日期命名）"
+          : "影片 / 課程單元標題";
+
+      document.getElementById("creatorLabel").textContent = isBook
+        ? "作者"
+        : isSocial
+          ? "發文者 / 帳號 (@Handle)"
+          : "講師 / 頻道";
+
+      document.getElementById("courseFieldWrap").style.display = isVideo ? "block" : "none";
+      document.getElementById("rangeDateRow").style.display = isSocial ? "none" : "grid";
+      document.getElementById("singleDateRow").style.display = isSocial ? "flex" : "none";
+
+      document.getElementById("metaTitle").value = note.title;
+      document.getElementById("metaCreator").value = note.creator;
+      document.getElementById("metaCourse").value = note.course;
+      document.getElementById("metaUrl").value = note.url;
+      document.getElementById("metaPlatform").value = note.platform;
+      document.getElementById("metaStartDate").value = note.startDate;
+      document.getElementById("metaEndDate").value = note.endDate;
+      document.getElementById("metaSingleDate").value = note.startDate;
+      document.getElementById("summaryInput").value = note.summary;
+      document.getElementById("revisitRating").value = note.revisitRating;
+
+      const tagChips = document.getElementById("tagChips");
+      tagChips.innerHTML = note.tags.map((t, i) => `
+        <span class="chip">#${escapeHtml(t)} <button type="button" data-idx="${i}" class="del-tag">×</button></span>
+      `).join("");
+      tagChips.querySelectorAll(".del-tag").forEach(btn => {
+        btn.addEventListener("click", () => {
+          note.tags.splice(Number(btn.dataset.idx), 1);
+          note.updatedAt = Date.now();
+          persistState();
+          renderAll();
+        });
+      });
+
+      const relChips = document.getElementById("relatedChips");
+      relChips.innerHTML = note.relatedNotes.map((r, i) => `
+        <span class="chip wiki">[[${escapeHtml(r)}]] <button type="button" data-idx="${i}" class="del-rel">×</button></span>
+      `).join("");
+      relChips.querySelectorAll(".del-rel").forEach(btn => {
+        btn.addEventListener("click", () => {
+          note.relatedNotes.splice(Number(btn.dataset.idx), 1);
+          note.updatedAt = Date.now();
+          persistState();
+          renderAll();
+        });
+      });
+
+      const showTimestamp = isVideo || (isSocial && note.socialFormat === "short");
+
+      const secContainer = document.getElementById("cornellSections");
+      secContainer.innerHTML = note.sections.map((sec, idx) => `
+        <div class="cornell-block" data-sec-id="${sec.id}">
+          <div class="cornell-block-top">
+            <input type="text" class="sec-heading" value="${escapeHtml(sec.heading)}" placeholder="段落標題（例如：核心論點 / 重點步驟）" style="max-width:320px; font-weight:600;" />
+            <div style="display:flex; gap:6px; align-items:center;">
+              ${showTimestamp ? `<input type="text" class="sec-ts" value="${escapeHtml(sec.timestamp)}" placeholder="時間戳記 如 00:45" style="width:135px; font-size:0.8rem;" />` : ""}
+              ${note.sections.length > 1 ? `<button type="button" class="btn-danger-ghost btn-sm del-sec">刪除</button>` : ""}
+            </div>
+          </div>
+          <div class="cornell-cols">
+            <div class="cornell-cue-box">
+              <div class="box-label"><span>💡 線索與隨思</span></div>
+              <textarea class="sec-cue" rows="4" placeholder="寫關鍵字、提問，或者睇到呢段時嘅隨思靈感...">${escapeHtml(sec.cue)}</textarea>
+            </div>
+            <div class="cornell-note-box">
+              <div class="box-label">
+                <span>${sec.noteMode === "quote" ? "💬 原文 / Caption 摘錄" : "📖 主筆記"}</span>
+                <div class="note-mode-toggle">
+                  <button type="button" class="mode-note ${sec.noteMode === "note" ? "active" : ""}">重點筆記</button>
+                  <button type="button" class="mode-quote ${sec.noteMode === "quote" ? "active" : ""}">原文摘錄</button>
+                </div>
+              </div>
+              <textarea class="sec-note" rows="4" placeholder="${sec.noteMode === "quote" ? "貼上帖文原文、Caption 或金句，匯出時自動轉為引用框 (>)..." : "記錄重點、步驟或技巧..."}">${escapeHtml(sec.note)}</textarea>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      secContainer.querySelectorAll(".cornell-block").forEach(block => {
+        const sec = note.sections.find(s => s.id === block.dataset.secId);
+        if (!sec) return;
+
+        block.querySelector(".sec-heading").addEventListener("input", e => {
+          sec.heading = e.target.value;
+          note.updatedAt = Date.now();
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+
+        const tsInput = block.querySelector(".sec-ts");
+        if (tsInput) {
+          tsInput.addEventListener("input", e => {
+            sec.timestamp = e.target.value;
+            note.updatedAt = Date.now();
+            persistState();
+            renderObsidianPreview(note, state.template);
+          });
+        }
+
+        block.querySelector(".sec-cue").addEventListener("input", e => {
+          sec.cue = e.target.value;
+          note.updatedAt = Date.now();
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+
+        block.querySelector(".sec-note").addEventListener("input", e => {
+          sec.note = e.target.value;
+          note.updatedAt = Date.now();
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+
+        block.querySelector(".mode-note").addEventListener("click", () => {
+          sec.noteMode = "note";
+          note.updatedAt = Date.now();
+          persistState();
+          renderAll();
+        });
+
+        block.querySelector(".mode-quote").addEventListener("click", () => {
+          sec.noteMode = "quote";
+          note.updatedAt = Date.now();
+          persistState();
+          renderAll();
+        });
+
+        const delBtn = block.querySelector(".del-sec");
+        if (delBtn) {
+          delBtn.addEventListener("click", () => {
+            note.sections = note.sections.filter(s => s.id !== sec.id);
+            note.updatedAt = Date.now();
+            persistState();
+            renderAll();
+          });
+        }
+      });
+
+      const qList = document.getElementById("questionsList");
+      qList.innerHTML = note.questions.map(q => `
+        <div class="list-row" data-qid="${q.id}">
+          <input type="checkbox" class="q-done" ${q.done ? "checked" : ""} />
+          <input type="text" class="q-text" value="${escapeHtml(q.text)}" placeholder="輸入延伸問題（可加 [[潛在筆記]]）..." />
+          <button type="button" class="btn-danger-ghost btn-sm q-del">×</button>
+        </div>
+      `).join("");
+      qList.querySelectorAll(".list-row").forEach(row => {
+        const q = note.questions.find(item => item.id === row.dataset.qid);
+        row.querySelector(".q-done").addEventListener("change", e => {
+          q.done = e.target.checked;
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+        row.querySelector(".q-text").addEventListener("input", e => {
+          q.text = e.target.value;
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+        row.querySelector(".q-del").addEventListener("click", () => {
+          note.questions = note.questions.filter(item => item.id !== q.id);
+          persistState();
+          renderAll();
+        });
+      });
+
+      const aList = document.getElementById("actionsList");
+      aList.innerHTML = note.actions.map(a => `
+        <div class="list-row" data-aid="${a.id}">
+          <input type="checkbox" class="a-done" ${a.done ? "checked" : ""} />
+          <input type="text" class="a-text" value="${escapeHtml(a.text)}" placeholder="輸入具體行動項目..." />
+          <button type="button" class="btn-danger-ghost btn-sm a-del">×</button>
+        </div>
+      `).join("");
+      aList.querySelectorAll(".list-row").forEach(row => {
+        const a = note.actions.find(item => item.id === row.dataset.aid);
+        row.querySelector(".a-done").addEventListener("change", e => {
+          a.done = e.target.checked;
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+        row.querySelector(".a-text").addEventListener("input", e => {
+          a.text = e.target.value;
+          persistState();
+          renderObsidianPreview(note, state.template);
+        });
+        row.querySelector(".a-del").addEventListener("click", () => {
+          note.actions = note.actions.filter(item => item.id !== a.id);
+          persistState();
+          renderAll();
+        });
+      });
+    }
+
+    function renderAll() {
+      const note = getActiveNote();
+      renderSidebar();
+      renderEditor();
+      renderObsidianPreview(note, state.template);
+    }
+
+    document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
+      document.getElementById("workspace").classList.toggle("sidebar-collapsed");
+    });
+
+    document.getElementById("togglePreviewBtn").addEventListener("click", () => {
+      document.getElementById("workspace").classList.toggle("preview-collapsed");
+    });
+
+    document.getElementById("viewRenderedBtn").addEventListener("click", () => {
+      document.getElementById("viewRenderedBtn").classList.add("active");
+      document.getElementById("viewRawBtn").classList.remove("active");
+      document.getElementById("renderedPreview").style.display = "block";
+      document.getElementById("rawMarkdownPreview").style.display = "none";
+    });
+
+    document.getElementById("viewRawBtn").addEventListener("click", () => {
+      document.getElementById("viewRawBtn").classList.add("active");
+      document.getElementById("viewRenderedBtn").classList.remove("active");
+      document.getElementById("rawMarkdownPreview").style.display = "block";
+      document.getElementById("renderedPreview").style.display = "none";
+    });
+
+    document.getElementById("newNoteBtn").addEventListener("click", () => {
+      const n = createEmptyNote("book");
+      state.notes.unshift(n);
+      state.activeNoteId = n.id;
+      persistState("已建立新筆記");
+      renderAll();
+      showToast("已新增空白筆記");
+    });
+
+    document.getElementById("searchNotesInput").addEventListener("input", renderSidebar);
+
+    document.getElementById("typeBookBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.type = "book";
+      if (!note.platform) note.platform = "Book";
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("typeVideoBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.type = "video";
+      if (note.platform === "Book") note.platform = "";
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("typeSocialBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.type = "social";
+      if (note.platform === "Book") note.platform = "";
+      if (note.sections.length === 1 && !note.sections[0].note) {
+        note.sections[0].noteMode = "quote";
+      }
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("socialTextBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.socialFormat = "post";
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("socialShortBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.socialFormat = "short";
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("metaTitle").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.title = e.target.value;
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaCreator").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.creator = e.target.value;
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaCourse").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.course = e.target.value;
+      persistState();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaUrl").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.url = e.target.value.trim();
+      const detected = detectPlatformFromUrl(note.url, note.type);
+      if (detected) {
+        note.platform = detected;
+        document.getElementById("metaPlatform").value = detected;
+        if (note.type === "social" && ["Instagram Reels", "TikTok", "YouTube Shorts"].includes(detected)) {
+          note.socialFormat = "short";
+          renderEditor();
+        }
+      }
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaPlatform").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.platform = e.target.value;
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("fetchYtBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      fetchYouTubeMeta(note.url);
+    });
+
+    document.getElementById("metaStartDate").addEventListener("change", e => {
+      const note = getActiveNote();
+      note.startDate = e.target.value;
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaEndDate").addEventListener("change", e => {
+      const note = getActiveNote();
+      note.endDate = e.target.value;
+      persistState();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("metaSingleDate").addEventListener("change", e => {
+      const note = getActiveNote();
+      note.startDate = e.target.value;
+      persistState();
+      renderSidebar();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("tagInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const val = e.target.value.trim().replace(/^#/, "");
+        if (!val) return;
+        const note = getActiveNote();
+        if (!note.tags.includes(val)) note.tags.push(val);
+        e.target.value = "";
+        persistState();
+        renderAll();
+      }
+    });
+
+    document.getElementById("relatedInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const val = e.target.value.trim().replace(/^\[\[|\]\]$/g, "");
+        if (!val) return;
+        const note = getActiveNote();
+        if (!note.relatedNotes.includes(val)) note.relatedNotes.push(val);
+        e.target.value = "";
+        persistState();
+        renderAll();
+      }
+    });
+
+    document.getElementById("addSectionBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.sections.push({
+        id: uid(),
+        heading: `段落 ${note.sections.length + 1}`,
+        cue: "",
+        note: "",
+        noteMode: note.type === "social" && note.socialFormat === "post" ? "quote" : "note",
+        timestamp: ""
+      });
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("summaryInput").addEventListener("input", e => {
+      const note = getActiveNote();
+      note.summary = e.target.value;
+      persistState();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("addQuestionBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.questions.push({ id: uid(), text: "", done: false });
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("revisitRating").addEventListener("change", e => {
+      const note = getActiveNote();
+      note.revisitRating = e.target.value;
+      persistState();
+      renderObsidianPreview(note, state.template);
+    });
+
+    document.getElementById("addActionBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      note.actions.push({ id: uid(), text: "", done: false });
+      persistState();
+      renderAll();
+    });
+
+    document.getElementById("copyMdBtn").addEventListener("click", async () => {
+      const note = getActiveNote();
+      const md = buildMarkdown(note, state.template);
+      try {
+        await navigator.clipboard.writeText(md);
+        note.exportedMd = true;
+        persistState();
+        renderSidebar();
+        showToast("已複製 Obsidian Markdown");
+      } catch {
+        showToast("複製失敗，請改用 Markdown 模式手動複製");
+      }
+    });
+
+    document.getElementById("downloadMdBtn").addEventListener("click", () => {
+      const note = getActiveNote();
+      const md = buildMarkdown(note, state.template);
+      const safeName = getDisplayTitle(note).replace(/[\\/:*?"<>|]/g, "-");
+      const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${safeName}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+      note.exportedMd = true;
+      persistState();
+      renderSidebar();
+      showToast(`已下載 ${safeName}.md`);
+    });
+
+    const templateModal = document.getElementById("templateModal");
+    function syncTemplateModalInputs() {
+      const t = state.template;
+      document.getElementById("tplStartDateKey").value = t.startDateKey;
+      document.getElementById("tplEndDateKey").value = t.endDateKey;
+      document.getElementById("tplRatingKey").value = t.ratingKey;
+      document.getElementById("tplBookTags").value = t.bookTags.join(", ");
+      document.getElementById("tplVideoTags").value = t.videoTags.join(", ");
+      document.getElementById("tplSocialTags").value = (t.socialTags || ["social-clipping"]).join(", ");
+      document.getElementById("tplCueStyle").value = t.cueStyle;
+      document.getElementById("tplOutlineHeading").value = t.outlineHeading;
+      document.getElementById("tplQuestionsHeading").value = t.questionsHeading;
+      document.getElementById("tplActionsHeading").value = t.actionsHeading;
+    }
+
+    document.getElementById("openTemplateBtn").addEventListener("click", () => {
+      syncTemplateModalInputs();
+      templateModal.classList.add("open");
+    });
+
+    document.getElementById("closeTemplateBtn").addEventListener("click", () => {
+      templateModal.classList.remove("open");
+    });
+
+    document.getElementById("presetBookBtn").addEventListener("click", () => {
+      document.getElementById("tplBookTags").value = "book, reading-notes";
+      document.getElementById("tplCueStyle").value = "callout";
+      document.getElementById("tplOutlineHeading").value = "📖 閱讀大綱與隨思";
+      showToast("已套用閱讀筆記 Preset");
+    });
+
+    document.getElementById("presetCourseBtn").addEventListener("click", () => {
+      document.getElementById("tplVideoTags").value = "course, study-notes";
+      document.getElementById("tplCueStyle").value = "callout";
+      document.getElementById("tplOutlineHeading").value = "🎓 課程單元筆記";
+      showToast("已套用線上課程 Preset");
+    });
+
+    document.getElementById("presetSocialBtn").addEventListener("click", () => {
+      document.getElementById("tplSocialTags").value = "social-clipping, inspiration";
+      document.getElementById("tplCueStyle").value = "callout";
+      document.getElementById("tplOutlineHeading").value = "💬 帖文 / 短片重點與隨思";
+      showToast("已套用帖文 / 短片 Preset");
+    });
+
+    document.getElementById("saveTemplateBtn").addEventListener("click", () => {
+      state.template = {
+        startDateKey: document.getElementById("tplStartDateKey").value.trim() || "start_date",
+        endDateKey: document.getElementById("tplEndDateKey").value.trim() || "end_date",
+        ratingKey: document.getElementById("tplRatingKey").value.trim() || "revisit_value",
+        bookTags: document.getElementById("tplBookTags").value.split(",").map(s => s.trim()).filter(Boolean),
+        videoTags: document.getElementById("tplVideoTags").value.split(",").map(s => s.trim()).filter(Boolean),
+        socialTags: document.getElementById("tplSocialTags").value.split(",").map(s => s.trim()).filter(Boolean),
+        cueStyle: document.getElementById("tplCueStyle").value,
+        outlineHeading: document.getElementById("tplOutlineHeading").value.trim() || "📝 內容大綱 (Cornell Notes)",
+        questionsHeading: document.getElementById("tplQuestionsHeading").value.trim() || "❓ 延伸問題",
+        actionsHeading: document.getElementById("tplActionsHeading").value.trim() || "🚀 Action Items"
+      };
+      persistState("已更新 Template 設定");
+      templateModal.classList.remove("open");
+      renderObsidianPreview(getActiveNote(), state.template);
+      showToast("Template 設定已儲存");
+    });
+
+    const backupModal = document.getElementById("backupModal");
+    function updateBackupStats() {
+      const lastStr = state.lastBackupAt ? new Date(state.lastBackupAt).toLocaleString("zh-HK") : "尚未匯出過";
+      document.getElementById("backupStatsText").textContent =
+        `目前共有 ${state.notes.length} 篇筆記；上次 JSON 備份時間：${lastStr}`;
+    }
+
+    document.getElementById("openBackupBtn").addEventListener("click", () => {
+      updateBackupStats();
+      backupModal.classList.add("open");
+    });
+
+    document.getElementById("closeBackupBtn").addEventListener("click", () => {
+      backupModal.classList.remove("open");
+    });
+
+    document.getElementById("doneBackupBtn").addEventListener("click", () => {
+      backupModal.classList.remove("open");
+    });
+
+    document.getElementById("exportJsonBtn").addEventListener("click", () => {
+      state.lastBackupAt = Date.now();
+      persistState();
+      const payload = JSON.stringify({
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        notes: state.notes,
+        template: state.template
+      }, null, 2);
+      const blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `cornell-obsidian-backup-${todayStr()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      updateBackupStats();
+      showToast("已匯出 JSON 完整備份");
+    });
+
+    document.getElementById("importJsonFileInput").addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!Array.isArray(data.notes)) {
+          throw new Error("Invalid backup format");
+        }
+        const importedNotes = data.notes.map(normalizeNote);
+        const mode = document.getElementById("importModeSelect").value;
+
+        if (mode === "replace") {
+          state.notes = importedNotes.length > 0 ? importedNotes : [createEmptyNote("book")];
+          state.activeNoteId = state.notes[0].id;
+        } else {
+          const map = new Map(state.notes.map(n => [n.id, n]));
+          importedNotes.forEach(n => map.set(n.id, n));
+          state.notes = Array.from(map.values());
+          if (importedNotes[0]) state.activeNoteId = importedNotes[0].id;
+        }
+
+        if (data.template) {
+          state.template = { ...createDefaultTemplate(), ...data.template };
+        }
+
+        persistState("已匯入 JSON 備份");
+        renderAll();
+        updateBackupStats();
+        showToast("已成功還原 JSON 備份");
+      } catch {
+        showToast("JSON 檔案格式不正確，未能匯入");
+      } finally {
+        e.target.value = "";
+      }
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
