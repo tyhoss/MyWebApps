@@ -132,6 +132,12 @@
       min-height: 84px;
     }
 
+    .input-with-btn {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
     /* Top Bar */
     .topbar {
       position: sticky;
@@ -795,7 +801,6 @@
           </div>
         </div>
 
-        <!-- Sub-switch for Social Post vs Short Video -->
         <div id="socialFormatBar" class="sub-switch-bar" style="display:none;">
           <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">內容形式：</span>
           <div class="type-switch" style="background:#fff;">
@@ -823,7 +828,7 @@
         <div class="grid-2">
           <div class="field">
             <label for="metaUrl">來源連結 / 網址（YouTube / Shorts 可自動抓標題）</label>
-            <div style="display:flex; gap:6px;">
+            <div class="input-with-btn">
               <input id="metaUrl" type="url" placeholder="https://..." />
               <button id="fetchYtBtn" type="button" class="btn-sm" title="抓取 YouTube 標題與頻道">抓取</button>
             </div>
@@ -834,7 +839,6 @@
           </div>
         </div>
 
-        <!-- Date Fields: Range for Book/Course, Single for Social -->
         <div id="rangeDateRow" class="grid-2">
           <div class="field">
             <label for="metaStartDate">開始日期</label>
@@ -853,13 +857,19 @@
 
         <div class="grid-2">
           <div class="field">
-            <label for="tagInput">標籤 Tags（按 Enter 新增）</label>
-            <input id="tagInput" type="text" placeholder="輸入 Tag 後按 Enter，例如：music-theory" />
+            <label for="tagInput">標籤 Tags（按 Enter、逗號或「＋ 加入」新增）</label>
+            <div class="input-with-btn">
+              <input id="tagInput" type="text" enterkeyhint="done" placeholder="例如：music-theory" />
+              <button id="addTagBtn" type="button" class="btn-sm">＋ 加入</button>
+            </div>
             <div id="tagChips" class="chip-row"></div>
           </div>
           <div class="field">
-            <label for="relatedInput">串連舊筆記 Related Notes（按 Enter 自動轉 [[雙向連結]]）</label>
-            <input id="relatedInput" type="text" placeholder="輸入筆記名稱後按 Enter，例如：對位法基礎" />
+            <label for="relatedInput">串連舊筆記 Related Notes（按 Enter、逗號或「＋ 加入」）</label>
+            <div class="input-with-btn">
+              <input id="relatedInput" type="text" enterkeyhint="done" placeholder="例如：對位法基礎" />
+              <button id="addRelatedBtn" type="button" class="btn-sm">＋ 加入</button>
+            </div>
             <div id="relatedChips" class="chip-row"></div>
           </div>
         </div>
@@ -1081,8 +1091,8 @@
     function createEmptyNote(type = "book") {
       return {
         id: uid(),
-        type, // "book" | "video" | "social"
-        socialFormat: "post", // "post" | "short"
+        type,
+        socialFormat: "post",
         title: "",
         creator: "",
         course: "",
@@ -1209,7 +1219,7 @@
       el.textContent = msg;
       el.classList.add("show");
       clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 2000);
     }
 
     function getActiveNote() {
@@ -1225,6 +1235,52 @@
         return `${who}${plat}${dt}`;
       }
       return "未命名筆記";
+    }
+
+    function commitTagFromInput(inputEl) {
+      if (!inputEl) return false;
+      const raw = inputEl.value.trim();
+      if (!raw) return false;
+      const parts = raw.split(/[,，]/).map(s => s.trim().replace(/^#/, "")).filter(Boolean);
+      if (parts.length === 0) return false;
+      const note = getActiveNote();
+      let added = false;
+      parts.forEach(val => {
+        if (!note.tags.includes(val)) {
+          note.tags.push(val);
+          added = true;
+        }
+      });
+      inputEl.value = "";
+      if (added) {
+        note.updatedAt = Date.now();
+        persistState();
+        renderAll();
+      }
+      return added;
+    }
+
+    function commitRelatedFromInput(inputEl) {
+      if (!inputEl) return false;
+      const raw = inputEl.value.trim();
+      if (!raw) return false;
+      const parts = raw.split(/[,，]/).map(s => s.trim().replace(/^\[\[|\]\]$/g, "")).filter(Boolean);
+      if (parts.length === 0) return false;
+      const note = getActiveNote();
+      let added = false;
+      parts.forEach(val => {
+        if (!note.relatedNotes.includes(val)) {
+          note.relatedNotes.push(val);
+          added = true;
+        }
+      });
+      inputEl.value = "";
+      if (added) {
+        note.updatedAt = Date.now();
+        persistState();
+        renderAll();
+      }
+      return added;
     }
 
     function detectPlatformFromUrl(urlStr, type) {
@@ -1933,30 +1989,44 @@
       renderObsidianPreview(note, state.template);
     });
 
-    document.getElementById("tagInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") {
+    // Tags: Enter / Comma / Button / Blur
+    const tagInputEl = document.getElementById("tagInput");
+    tagInputEl.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.keyCode === 13) {
         e.preventDefault();
-        const val = e.target.value.trim().replace(/^#/, "");
-        if (!val) return;
-        const note = getActiveNote();
-        if (!note.tags.includes(val)) note.tags.push(val);
-        e.target.value = "";
-        persistState();
-        renderAll();
+        commitTagFromInput(tagInputEl);
       }
     });
-
-    document.getElementById("relatedInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const val = e.target.value.trim().replace(/^\[\[|\]\]$/g, "");
-        if (!val) return;
-        const note = getActiveNote();
-        if (!note.relatedNotes.includes(val)) note.relatedNotes.push(val);
-        e.target.value = "";
-        persistState();
-        renderAll();
+    tagInputEl.addEventListener("input", e => {
+      if (e.target.value.includes(",") || e.target.value.includes("，")) {
+        commitTagFromInput(tagInputEl);
       }
+    });
+    tagInputEl.addEventListener("blur", () => {
+      commitTagFromInput(tagInputEl);
+    });
+    document.getElementById("addTagBtn").addEventListener("click", () => {
+      commitTagFromInput(tagInputEl);
+    });
+
+    // Related Notes: Enter / Comma / Button / Blur
+    const relatedInputEl = document.getElementById("relatedInput");
+    relatedInputEl.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.keyCode === 13) {
+        e.preventDefault();
+        commitRelatedFromInput(relatedInputEl);
+      }
+    });
+    relatedInputEl.addEventListener("input", e => {
+      if (e.target.value.includes(",") || e.target.value.includes("，")) {
+        commitRelatedFromInput(relatedInputEl);
+      }
+    });
+    relatedInputEl.addEventListener("blur", () => {
+      commitRelatedFromInput(relatedInputEl);
+    });
+    document.getElementById("addRelatedBtn").addEventListener("click", () => {
+      commitRelatedFromInput(relatedInputEl);
     });
 
     document.getElementById("addSectionBtn").addEventListener("click", () => {
